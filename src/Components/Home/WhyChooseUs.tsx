@@ -1,613 +1,525 @@
-// components/WhyChooseSection.tsx
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
-import { Fraunces, Inter } from "next/font/google";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useCallback,
+  useState,
+} from "react";
+import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import {
   Target,
-  Boxes,
+  Zap,
   TrendingUp,
   Handshake,
   Rocket,
+  Lightbulb,
   Sparkles,
   ArrowUpRight,
-  type LucideIcon,
-  Compass,
-  Shield,
-  Zap,
-  Globe,
-  Palette,
-  Brain,
 } from "lucide-react";
 
-gsap.registerPlugin(ScrollTrigger);
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+  ScrollTrigger.config({ ignoreMobileResize: true });
+}
 
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-  variable: "--font-display",
-  display: "swap",
-});
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-body",
-  display: "swap",
-});
+/* -------------------------------------------------------------------- */
+/*  Content                                                              */
+/* -------------------------------------------------------------------- */
 
-/* ------------------------------------------------------------------ */
-/*  Content                                                            */
-/* ------------------------------------------------------------------ */
-
-type Feature = {
-  icon: LucideIcon;
-  secondaryIcon: LucideIcon;
+interface Reason {
+  icon: React.ReactNode;
   title: string;
   description: string;
-  color: string;
   gradient: string;
-};
+  shadowColor: string;
+  ringColor: string;
+}
 
-const FEATURES: Feature[] = [
+const REASONS: Reason[] = [
   {
-    icon: Target,
-    secondaryIcon: Compass,
+    icon: <Target className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />,
     title: "Tailored Strategies",
     description: "Built around your business goals, not generic templates.",
-    color: "#8C6A3A",
-    gradient: "from-amber-600 to-yellow-700",
+    gradient: "from-blue-600 to-indigo-600",
+    shadowColor: "rgba(37, 99, 235, 0.3)",
+    ringColor: "#2563EB",
   },
   {
-    icon: Boxes,
-    secondaryIcon: Globe,
+    icon: <Zap className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />,
     title: "End-to-End Expertise",
     description: "Technology, marketing, branding, and growth under one roof.",
-    color: "#B08A55",
-    gradient: "from-orange-600 to-amber-700",
+    gradient: "from-amber-500 to-orange-600",
+    shadowColor: "rgba(245, 158, 11, 0.3)",
+    ringColor: "#F59E0B",
   },
   {
-    icon: TrendingUp,
-    secondaryIcon: Zap,
+    icon: <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />,
     title: "Results-Driven Approach",
     description: "Focused on visibility, leads, and long-term business growth.",
-    color: "#9A7B49",
-    gradient: "from-yellow-700 to-amber-800",
+    gradient: "from-emerald-500 to-teal-600",
+    shadowColor: "rgba(16, 185, 129, 0.3)",
+    ringColor: "#10B981",
   },
   {
-    icon: Handshake,
-    secondaryIcon: Shield,
+    icon: <Handshake className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />,
     title: "Transparent Collaboration",
     description: "Open communication and reliable support at every stage.",
-    color: "#C4A265",
-    gradient: "from-amber-500 to-orange-600",
+    gradient: "from-purple-500 to-pink-600",
+    shadowColor: "rgba(168, 85, 247, 0.3)",
+    ringColor: "#A855F7",
   },
   {
-    icon: Rocket,
-    secondaryIcon: Brain,
+    icon: <Rocket className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />,
     title: "Scalable Solutions",
     description: "Flexible solutions designed to support future growth.",
-    color: "#D9C29B",
-    gradient: "from-amber-400 to-yellow-600",
+    gradient: "from-cyan-500 to-blue-600",
+    shadowColor: "rgba(6, 182, 212, 0.3)",
+    ringColor: "#06B6D4",
   },
   {
-    icon: Sparkles,
-    secondaryIcon: Palette,
+    icon: <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />,
     title: "Innovation Focused",
     description: "Modern technologies and strategies to keep you ahead.",
-    color: "#8C6A3A",
-    gradient: "from-yellow-600 to-amber-700",
+    gradient: "from-rose-500 to-red-600",
+    shadowColor: "rgba(244, 63, 94, 0.3)",
+    ringColor: "#F43F5E",
   },
 ];
 
-/* ------------------------------------------------------------------ */
-/*  Animated Background Orbs                                           */
-/* ------------------------------------------------------------------ */
+const EASE = "expo.out";
 
-function AnimatedBackground() {
-  const sectionRef = useRef<HTMLDivElement>(null);
+/* -------------------------------------------------------------------- */
+/*  Lenis <-> GSAP wiring                                                */
+/* -------------------------------------------------------------------- */
+
+function useLenisGsap() {
+  useEffect(() => {
+    const w = window as typeof window & { __growwyldLenis?: Lenis };
+
+    if (w.__growwyldLenis) {
+      return;
+    }
+
+    const lenis = new Lenis({
+      duration: 1.15,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+    });
+    w.__growwyldLenis = lenis;
+
+    const tick = (time: number) => {
+      lenis.raf(time * 1000);
+      ScrollTrigger.update();
+    };
+    gsap.ticker.add(tick);
+    gsap.ticker.lagSmoothing(0);
+
+    const refresh = () => ScrollTrigger.refresh();
+    window.addEventListener("load", refresh);
+    const t = setTimeout(refresh, 100);
+
+    return () => {
+      gsap.ticker.remove(tick);
+      lenis.destroy();
+      delete w.__growwyldLenis;
+      window.removeEventListener("load", refresh);
+      clearTimeout(t);
+    };
+  }, []);
+}
+
+/* -------------------------------------------------------------------- */
+/*  Scroll reveal hook                                                   */
+/* -------------------------------------------------------------------- */
+
+function useReveal<T extends HTMLElement>(opts?: {
+  y?: number;
+  duration?: number;
+  delay?: number;
+  x?: number;
+  scale?: number;
+}) {
+  const ref = useRef<T | null>(null);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const orbs = document.querySelectorAll(".bg-orb");
-
-    orbs.forEach((orb) => {
-      gsap.to(orb, {
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 1,
+    const el = ref.current;
+    if (!el) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        el,
+        {
+          opacity: 0,
+          y: opts?.y ?? 24,
+          x: opts?.x ?? 0,
+          scale: opts?.scale ?? 1,
         },
-        y: gsap.utils.random(-100, 100),
-        x: gsap.utils.random(-50, 50),
-        scale: gsap.utils.random(0.8, 1.2),
-        opacity: gsap.utils.random(0.3, 0.6),
-      });
+        {
+          opacity: 1,
+          y: 0,
+          x: 0,
+          scale: 1,
+          duration: opts?.duration ?? 0.7,
+          delay: opts?.delay ?? 0,
+          ease: EASE,
+          scrollTrigger: { trigger: el, start: "top 88%", once: true },
+        },
+      );
     });
+    return () => ctx.revert();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return (
-    <div
-      ref={sectionRef}
-      className="absolute inset-0 overflow-hidden pointer-events-none"
-    >
-      {/* Grid pattern */}
-      <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `radial-gradient(circle, #8C6A3A 1px, transparent 1px)`,
-          backgroundSize: "40px 40px",
-        }}
-      />
-
-      {/* Floating orbs */}
-      <div className="bg-orb absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-gradient-to-br from-amber-200/20 to-yellow-300/10 blur-3xl" />
-      <div className="bg-orb absolute top-2/3 right-1/4 w-80 h-80 rounded-full bg-gradient-to-br from-orange-200/15 to-amber-300/10 blur-3xl" />
-      <div className="bg-orb absolute bottom-1/4 left-1/3 w-64 h-64 rounded-full bg-gradient-to-br from-yellow-300/15 to-amber-400/10 blur-3xl" />
-    </div>
-  );
+  return ref;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Decorative Compass Ring                                            */
-/* ------------------------------------------------------------------ */
+/* -------------------------------------------------------------------- */
+/*  Circular Card Component                                              */
+/* -------------------------------------------------------------------- */
 
-function CompassRing() {
-  return (
-    <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-        className="relative w-48 h-48 sm:w-64 sm:h-64"
-      >
-        {/* Outer ring */}
-        <div className="absolute inset-0 rounded-full border border-[#D9C29B]/20" />
-
-        {/* Rotating ring with dashes */}
-        <div className="absolute inset-4 rounded-full border-2 border-dashed border-[#B08A55]/30" />
-
-        {/* Inner decorative ring */}
-        <div className="absolute inset-8 rounded-full border border-[#D9C29B]/30 bg-gradient-to-br from-[#FBFAF7]/50 to-transparent backdrop-blur-sm" />
-
-        {/* Center dot */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-gradient-to-br from-[#B08A55] to-[#8C6A3A] shadow-lg shadow-[#B08A55]/30" />
-
-        {/* Decorative dots */}
-        {[0, 90, 180, 270].map((angle) => (
-          <div
-            key={angle}
-            className="absolute w-2 h-2 rounded-full bg-[#D9C29B]/40"
-            style={{
-              top: "50%",
-              left: "50%",
-              transform: `rotate(${angle}deg) translateX(90px) translateY(-50%)`,
-            }}
-          />
-        ))}
-      </motion.div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Feature Card with 3D flip                                          */
-/* ------------------------------------------------------------------ */
-
-function FeatureCard({ feature, index }: { feature: Feature; index: number }) {
-  const Icon = feature.icon;
-  const SecondaryIcon = feature.secondaryIcon;
+function CircularCard({
+  reason,
+  registerRef,
+  index,
+  total,
+  radius,
+}: {
+  reason: Reason;
+  registerRef: (el: HTMLDivElement | null, i: number) => void;
+  index: number;
+  total: number;
+  radius: number;
+}) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const [isHovered, setIsHovered] = useState(false);
 
-  const px = useMotionValue(0.5);
-  const py = useMotionValue(0.5);
-  const springCfg = { stiffness: 160, damping: 20, mass: 0.5 };
-  const rotateX = useSpring(useTransform(py, [0, 1], [8, -8]), springCfg);
-  const rotateY = useSpring(useTransform(px, [0, 1], [-8, 8]), springCfg);
-  const glowX = useTransform(px, [0, 1], ["0%", "100%"]);
-  const glowY = useTransform(py, [0, 1], ["0%", "100%"]);
+  const angle = (index / total) * 2 * Math.PI - Math.PI / 2;
+  const x = Math.cos(angle) * radius;
+  const y = Math.sin(angle) * radius;
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = cardRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    px.set((e.clientX - rect.left) / rect.width);
-    py.set((e.clientY - rect.top) / rect.height);
+  const style: React.CSSProperties = {
+    position: "absolute",
+    left: "50%",
+    top: "50%",
+    transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
+    opacity: 0,
+  };
+
+  const handleMouseEnter = () => {
+    if (cardRef.current && window.innerWidth >= 1024) {
+      gsap.to(cardRef.current, {
+        scale: 1.15,
+        rotate: 5,
+        duration: 0.5,
+        ease: "back.out(1.7)",
+        transformPerspective: 800,
+      });
+    }
   };
 
   const handleMouseLeave = () => {
-    px.set(0.5);
-    py.set(0.5);
-    setIsHovered(false);
+    if (cardRef.current && window.innerWidth >= 1024) {
+      gsap.to(cardRef.current, {
+        scale: 1,
+        rotate: 0,
+        duration: 0.7,
+        ease: "elastic.out(1, 0.5)",
+        transformPerspective: 800,
+      });
+    }
   };
 
   return (
-    <motion.div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
+    <div
+      ref={(el) => {
+        cardRef.current = el;
+        registerRef(el, index);
+      }}
+      style={style}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onMouseEnter={() => setIsHovered(true)}
-      initial={{ opacity: 0, rotateX: 15, rotateY: -15, y: 60 }}
-      whileInView={{ opacity: 1, rotateX: 0, rotateY: 0, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{
-        duration: 0.8,
-        delay: index * 0.1,
-        ease: [0.22, 1, 0.36, 1],
-      }}
-      style={{
-        rotateX,
-        rotateY,
-        transformStyle: "preserve-3d",
-        transformPerspective: 1200,
-      }}
-      className="group relative bg-white/80 backdrop-blur-sm rounded-[28px] border border-[#EAE4D8]/60 p-8 shadow-[0_8px_30px_-12px_rgba(20,17,15,0.08)] transition-all duration-500 hover:shadow-[0_20px_50px_-15px_rgba(20,17,15,0.15)] hover:bg-white/95"
+      className="group relative flex h-16 w-16 sm:h-28 sm:w-28 md:h-32 md:w-32 lg:h-40 lg:w-40 xl:h-44 xl:w-44 flex-col items-center justify-center overflow-hidden rounded-full bg-white/90 backdrop-blur-sm p-1.5 sm:p-2 md:p-3 shadow-[0_10px_30px_-15px_rgba(17,62,110,0.2)] hover:shadow-[0_20px_50px_-15px_rgba(17,62,110,0.4)] transition-shadow duration-300 cursor-pointer"
     >
-      {/* Conic gradient border on hover */}
+      {/* Gradient ring */}
       <div
-        className="absolute inset-0 rounded-[28px] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        className="absolute inset-0 rounded-full opacity-15 group-hover:opacity-30 transition-opacity duration-300"
         style={{
-          background: `conic-gradient(from 0deg, transparent, ${feature.color}40, transparent, ${feature.color}40, transparent)`,
-          mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          maskComposite: "exclude",
-          padding: "2px",
-          animation: "rotateBorder 4s linear infinite",
+          background: `conic-gradient(from 0deg, transparent, ${reason.ringColor}, transparent, ${reason.ringColor}, transparent)`,
         }}
       />
 
-      {/* Cursor-follow glow */}
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-[28px] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{
-          background: `radial-gradient(200px circle at ${glowX} ${glowY}, ${feature.color}10, transparent 70%)`,
-        }}
+      {/* Inner ring */}
+      <div
+        className="absolute inset-[2px] rounded-full bg-white/95 backdrop-blur-sm"
+        style={{ border: `2px solid ${reason.ringColor}25` }}
       />
 
-      <div style={{ transform: "translateZ(50px)" }} className="relative">
-        {/* Icon with 3D flip effect */}
-        <div className="relative w-16 h-16 perspective-500">
-          <motion.div
-            animate={{ rotateY: isHovered ? 180 : 0 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            style={{ transformStyle: "preserve-3d" }}
-            className="relative w-full h-full"
-          >
-            {/* Front face */}
-            <div
-              className="absolute inset-0 flex items-center justify-center rounded-2xl backface-hidden"
-              style={{
-                background: `linear-gradient(135deg, ${feature.color}15, ${feature.color}05)`,
-                boxShadow: `0 8px 24px -8px ${feature.color}30, inset 0 0 0 1px ${feature.color}20`,
-              }}
-            >
-              <Icon
-                size={28}
-                strokeWidth={1.5}
-                style={{ color: feature.color }}
-              />
-            </div>
-
-            {/* Back face */}
-            <div
-              className="absolute inset-0 flex items-center justify-center rounded-2xl backface-hidden"
-              style={{
-                transform: "rotateY(180deg)",
-                background: `linear-gradient(135deg, ${feature.color}20, ${feature.color}10)`,
-                boxShadow: `0 8px 24px -8px ${feature.color}40, inset 0 0 0 1px ${feature.color}30`,
-              }}
-            >
-              <SecondaryIcon
-                size={28}
-                strokeWidth={1.5}
-                style={{ color: feature.color }}
-              />
-            </div>
-          </motion.div>
-
-          {/* Rotating ring around icon */}
-          <motion.div
-            animate={{ rotate: isHovered ? 360 : 0 }}
-            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-            className="absolute -inset-2 rounded-2xl border-2 border-dashed"
-            style={{ borderColor: `${feature.color}30` }}
-          />
+      {/* Content */}
+      <div className="relative flex flex-col items-center text-center">
+        {/* Icon container */}
+        <div
+          className={`flex h-6 w-6 sm:h-9 sm:w-9 md:h-10 md:w-10 lg:h-11 lg:w-11 items-center justify-center rounded-full bg-gradient-to-br ${reason.gradient} shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6`}
+          style={{
+            boxShadow: `0 6px 15px -3px ${reason.shadowColor}`,
+          }}
+        >
+          <span className="text-white">{reason.icon}</span>
         </div>
 
-        <h3
-          className="mt-6 text-xl leading-snug text-[#14110F] sm:text-[1.35rem]"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          {feature.title}
+        {/* Title */}
+        <h3 className="mt-1 sm:mt-1.5 text-[7px] sm:text-[9px] md:text-[10px] lg:text-xs font-semibold text-slate-800 leading-tight">
+          {reason.title}
         </h3>
-        <p className="mt-3 text-sm leading-relaxed text-[#5B564E] sm:text-[15px]">
-          {feature.description}
+
+        {/* Description - visible only on larger screens */}
+        <p className="hidden lg:block mt-0.5 text-[8px] text-slate-600 leading-snug px-1">
+          {reason.description}
         </p>
 
-        {/* Animated underline */}
+        {/* Decorative line */}
         <div
-          className="relative mt-4 h-0.5 w-0 bg-current transition-all duration-500 group-hover:w-full"
-          style={{ backgroundColor: `${feature.color}40` }}
+          className={`mt-0.5 sm:mt-1 h-[2px] w-3 sm:w-5 bg-gradient-to-r ${reason.gradient} rounded-full transition-all duration-300 group-hover:w-6`}
         />
       </div>
 
-      {/* Animated index number */}
-      <motion.span
-        className="absolute right-6 top-6 text-4xl font-bold select-none"
+      {/* Hover glow effect */}
+      <div
+        className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
         style={{
-          color: `${feature.color}15`,
-          fontFamily: "var(--font-display)",
-          transform: "translateZ(30px)",
+          boxShadow: `0 0 30px 8px ${reason.shadowColor}`,
         }}
-        animate={{
-          scale: isHovered ? 1.1 : 1,
-          color: isHovered ? `${feature.color}25` : `${feature.color}10`,
-        }}
-        transition={{ duration: 0.3 }}
-      >
-        {String(index + 1).padStart(2, "0")}
-      </motion.span>
-    </motion.div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Connecting Line                                                    */
-/* ------------------------------------------------------------------ */
-
-function ConnectingLine() {
-  const pathRef = useRef<SVGPathElement>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const path = pathRef.current;
-    if (!path) return;
-
-    const length = path.getTotalLength();
-
-    gsap.set(path, {
-      strokeDasharray: length,
-      strokeDashoffset: length,
-    });
-
-    gsap.to(path, {
-      scrollTrigger: {
-        trigger: path,
-        start: "top bottom+=100",
-        end: "bottom top-=100",
-        scrub: 1,
-      },
-      strokeDashoffset: 0,
-      duration: 1,
-    });
-  }, []);
-
-  return (
-    <div className="absolute inset-0 pointer-events-none hidden lg:block">
-      <svg
-        className="w-full h-full"
-        viewBox="0 0 1200 600"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        preserveAspectRatio="none"
-      >
-        <path
-          ref={pathRef}
-          d="M 200 100 C 400 200, 300 400, 500 300 C 700 200, 600 500, 800 350 C 1000 200, 950 450, 1050 300"
-          stroke="url(#gradient)"
-          strokeWidth="2"
-          strokeDasharray="8 8"
-          fill="none"
-          opacity="0.2"
-        />
-        <defs>
-          <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#D9C29B" stopOpacity="0" />
-            <stop offset="50%" stopColor="#B08A55" stopOpacity="0.5" />
-            <stop offset="100%" stopColor="#D9C29B" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-      </svg>
+      />
     </div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Magnetic CTA Button                                                */
-/* ------------------------------------------------------------------ */
-
-function MagneticButton() {
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const button = buttonRef.current;
-    const wrapper = wrapperRef.current;
-    if (!button || !wrapper) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = wrapper.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
-
-      gsap.to(button, {
-        x: x * 0.3,
-        y: y * 0.3,
-        duration: 0.8,
-        ease: "power3.out",
-      });
-    };
-
-    const handleMouseLeave = () => {
-      gsap.to(button, {
-        x: 0,
-        y: 0,
-        duration: 1,
-        ease: "elastic.out(1, 0.5)",
-      });
-    };
-
-    wrapper.addEventListener("mousemove", handleMouseMove);
-    wrapper.addEventListener("mouseleave", handleMouseLeave);
-
-    return () => {
-      wrapper.removeEventListener("mousemove", handleMouseMove);
-      wrapper.removeEventListener("mouseleave", handleMouseLeave);
-    };
-  }, []);
-
-  return (
-    <div ref={wrapperRef} className="relative inline-block">
-      <button
-        ref={buttonRef}
-        className="group relative inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-[#14110F] via-[#1a1512] to-[#14110F] px-10 py-5 text-base font-medium tracking-wide text-white transition-all duration-500 hover:shadow-[0_20px_40px_-12px_rgba(20,17,15,0.4)]"
-      >
-        {/* Pulsing glow */}
-        <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#B08A55]/20 to-[#8C6A3A]/20 blur-xl animate-pulse" />
-        </div>
-
-        {/* Shimmer effect */}
-        <div className="absolute inset-0 overflow-hidden rounded-full">
-          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-        </div>
-
-        <span className="relative">Start Growing Today</span>
-        <ArrowUpRight
-          size={20}
-          className="relative transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
-        />
-      </button>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Animated Heading Word by Word                                      */
-/* ------------------------------------------------------------------ */
-
-function AnimatedHeading() {
-  const words = ["Why", "Businesses", "Choose", "Growwyld Tech"];
-
-  return (
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.6 }}
-      className="mx-auto max-w-3xl text-center"
-    >
-      <motion.p
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="mb-6 flex items-center justify-center gap-3 text-[11px] font-medium uppercase tracking-[0.32em] text-[#9A7B49]"
-      >
-        <motion.span
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="h-px w-8 bg-[#B08A55] origin-right"
-        />
-        Why Us
-        <motion.span
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="h-px w-8 bg-[#B08A55] origin-left"
-        />
-      </motion.p>
-
-      <h2
-        className="text-[2.4rem] leading-[1.08] tracking-tight text-[#14110F] sm:text-5xl lg:text-6xl"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
-        {words.map((word, i) => (
-          <motion.span
-            key={word}
-            initial={{ opacity: 0, y: 40, rotateX: -40 }}
-            whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-            viewport={{ once: true }}
-            transition={{
-              duration: 0.7,
-              delay: 0.6 + i * 0.1,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-            className="inline-block mr-3"
-            style={{ transformOrigin: "bottom" }}
-          >
-            {word === "Growwyld Tech" ? (
-              <span className="italic text-[#9A7B49]">{word}</span>
-            ) : (
-              word
-            )}
-          </motion.span>
-        ))}
-      </h2>
-    </motion.div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Section                                                            */
-/* ------------------------------------------------------------------ */
+/* -------------------------------------------------------------------- */
+/*  Main section                                                         */
+/* -------------------------------------------------------------------- */
 
 export default function WhyChooseSection() {
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const sectionRef = useRef<HTMLElement>(null);
+  const centerOrbRef = useRef<HTMLDivElement>(null);
+  const [radius, setRadius] = useState(130);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useLenisGsap();
+
+  // Calculate radius based on viewport
+  useIsomorphicLayoutEffect(() => {
+    const calculateRadius = () => {
+      const width = window.innerWidth;
+      if (width < 400) {
+        setRadius(80);
+      } else if (width < 640) {
+        setRadius(110);
+      } else if (width < 768) {
+        setRadius(150);
+      } else if (width < 1024) {
+        setRadius(190);
+      } else if (width < 1280) {
+        setRadius(230);
+      } else {
+        setRadius(260);
+      }
+    };
+
+    calculateRadius();
+    setIsMounted(true);
+  }, []);
+
+  // Update radius on resize
+  useEffect(() => {
+    if (!isMounted) return;
+
+    let timeout: NodeJS.Timeout;
+    const calculateRadius = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        const width = window.innerWidth;
+        if (width < 400) {
+          setRadius(80);
+        } else if (width < 640) {
+          setRadius(110);
+        } else if (width < 768) {
+          setRadius(150);
+        } else if (width < 1024) {
+          setRadius(190);
+        } else if (width < 1280) {
+          setRadius(230);
+        } else {
+          setRadius(260);
+        }
+      }, 100);
+    };
+
+    window.addEventListener("resize", calculateRadius);
+    return () => {
+      window.removeEventListener("resize", calculateRadius);
+      clearTimeout(timeout);
+    };
+  }, [isMounted]);
+
+  const headingRef = useReveal<HTMLHeadingElement>({
+    y: 30,
+    x: -40,
+    duration: 0.8,
+    delay: 0.1,
+  });
+  const subRef = useReveal<HTMLParagraphElement>({
+    y: 20,
+    x: -40,
+    duration: 0.7,
+    delay: 0.2,
+  });
+  const badgeRef = useReveal<HTMLDivElement>({
+    y: 20,
+    duration: 0.6,
+    delay: 0.05,
+    scale: 0.9,
+  });
+
+  const registerRef = useCallback((el: HTMLDivElement | null, i: number) => {
+    cardRefs.current[i] = el;
+  }, []);
+
+  // Card entrance animations
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[];
+    if (!cards.length) return;
+
+    const ctx = gsap.context(() => {
+      cards.forEach((card, i) => {
+        gsap.fromTo(
+          card,
+          { opacity: 0, scale: 0.3, rotate: -90, y: 50 },
+          {
+            opacity: 1,
+            scale: 1,
+            rotate: 0,
+            y: 0,
+            duration: 0.6,
+            ease: EASE,
+            delay: 0.2 + i * 0.08,
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top 75%",
+              once: true,
+            },
+          },
+        );
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [isMounted]);
+
+  // Center orb pulse animation
+  useEffect(() => {
+    if (!isMounted || !centerOrbRef.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.to(centerOrbRef.current, {
+        scale: 1.05,
+        boxShadow: "0 0 50px 15px rgba(59, 130, 246, 0.3)",
+        duration: 2,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+    });
+
+    return () => ctx.revert();
+  }, [isMounted]);
+
   return (
     <section
-      className={`${fraunces.variable} ${inter.variable} relative w-full overflow-hidden bg-[#FBFAF7] py-24 sm:py-32 lg:py-40`}
-      style={{ fontFamily: "var(--font-body)" }}
+      ref={sectionRef}
+      id="why-choose-us"
+      className="relative overflow-hidden py-16 sm:py-20 md:py-24 lg:py-28"
     >
-      {/* Add keyframes for conic border rotation */}
-      <style jsx>{`
-        @keyframes rotateBorder {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        .backface-hidden {
-          backface-visibility: hidden;
-        }
-        .perspective-500 {
-          perspective: 500px;
-        }
-      `}</style>
+      {/* Subtle decorative rings in background */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <div className="h-[400px] w-[400px] rounded-full border border-blue-100/40 sm:h-[550px] sm:w-[550px] lg:h-[650px] lg:w-[650px]" />
+        <div className="absolute inset-10 rounded-full border border-blue-100/25 sm:inset-14" />
+        <div className="absolute inset-20 rounded-full border border-blue-100/15 sm:inset-28" />
+      </div>
 
-      <AnimatedBackground />
-      <CompassRing />
-      <ConnectingLine />
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Header - Left aligned */}
+        <div className="max-w-3xl">
+          {/* Badge */}
+          <div
+            ref={badgeRef}
+            style={{ opacity: 0 }}
+            className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50/50 px-4 py-1.5 backdrop-blur-sm"
+          >
+            <Sparkles className="h-4 w-4 text-blue-600" />
+            <span className="text-xs sm:text-sm font-medium text-blue-700">
+              Why Choose Us
+            </span>
+          </div>
 
-      <div className="relative mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
-        <AnimatedHeading />
-
-        {/* Feature grid */}
-        <div className="relative mt-16 grid grid-cols-1 gap-6 sm:mt-20 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3">
-          {FEATURES.map((feature, i) => (
-            <FeatureCard key={feature.title} feature={feature} index={i} />
-          ))}
+          <h2
+            ref={headingRef}
+            style={{ opacity: 0 }}
+            className="mt-3 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-slate-900"
+          >
+            Why Businesses Choose{" "}
+            <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              Growwyld Tech
+            </span>
+          </h2>
+          <p
+            ref={subRef}
+            style={{ opacity: 0 }}
+            className="mt-3 sm:mt-4 max-w-xl text-sm sm:text-base lg:text-lg leading-relaxed text-slate-600"
+          >
+            Six commitments that shape every project we take on — from the first
+            strategy call to the growth that follows.
+          </p>
         </div>
 
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          className="mt-16 flex justify-center sm:mt-24"
+        {/* Circular Orbit Layout */}
+        <div
+          className="relative mt-10 sm:mt-14 h-[280px] sm:h-[420px] md:h-[500px] lg:h-[580px] xl:h-[620px]"
+          style={{ perspective: 2000 }}
         >
-          <MagneticButton />
-        </motion.div>
+          {/* Center orb */}
+          <div
+            ref={centerOrbRef}
+            className="absolute left-1/2 top-1/2 z-20 flex h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 xl:h-28 xl:w-28 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-600 shadow-[0_0_30px_8px_rgba(37,99,235,0.25)]"
+          >
+            <div className="text-center">
+              <div className="text-sm sm:text-base md:text-xl lg:text-2xl xl:text-3xl font-bold text-white">
+                6
+              </div>
+              <div className="text-[6px] sm:text-[7px] md:text-[8px] lg:text-[9px] xl:text-[10px] uppercase tracking-wider text-white/80">
+                Reasons
+              </div>
+            </div>
+          </div>
+
+          {/* Circular cards */}
+          {REASONS.map((reason, i) => (
+            <CircularCard
+              key={reason.title}
+              reason={reason}
+              index={i}
+              total={REASONS.length}
+              registerRef={registerRef}
+              radius={radius}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );

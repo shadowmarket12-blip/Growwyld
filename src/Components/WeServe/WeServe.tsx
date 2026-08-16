@@ -70,7 +70,7 @@ const INDUSTRIES: Industry[] = [
   {
     name: "Healthcare & Medical",
     icon: Stethoscope,
-    image: "/Industries/Healthcare & Medical.webp",
+    image: "/Industries/Healthcare and Medical.webp",
     items: [
       "Hospitals",
       "Clinics",
@@ -557,7 +557,7 @@ export default function IndustriesSection() {
   return (
     <section
       ref={sectionRef}
-      className={`${fraunces.variable} ${inter.variable} relative w-full overflow-hidden bg-white py-24 sm:py-32 lg:py-40`}
+      className={`${fraunces.variable} ${inter.variable} relative w-full overflow-hidden bg-white py-24 sm:py-32 lg:py-32`}
       style={{ fontFamily: "var(--font-body)" }}
     >
       {/* ambient decor — luxury layered glow */}
@@ -602,17 +602,7 @@ export default function IndustriesSection() {
       </div>
 
       <div className="relative mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
-        {/* ---------------------------------------------------- */}
-        {/*  Heading — left-aligned                                */}
-        {/* ---------------------------------------------------- */}
         <div ref={headingRef} className="max-w-3xl text-left">
-          {/* <p
-            data-reveal
-            className="mb-5 flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.32em] text-[#091b2d]"
-          >
-            <span className="h-px w-8 bg-[#091b2d]" />
-            Where We Work
-          </p> */}
           <h2
             data-reveal
             className="text-2xl md:text-3xl lg:text-5xl font-medium text-black"
@@ -638,23 +628,27 @@ export default function IndustriesSection() {
         {/* ---------------------------------------------------- */}
         <div
           ref={gridRef}
-          className="mt-16 grid auto-rows-[210px] grid-cols-2 gap-3 sm:mt-20 sm:auto-rows-[230px] sm:gap-4 md:grid-cols-3 lg:grid-cols-4"
+          className="mt-10 grid auto-rows-[210px] grid-cols-2 gap-3 sm:mt-10 sm:auto-rows-[230px] sm:gap-4 md:grid-cols-3 lg:grid-cols-4"
           style={{ perspective: "1400px" }}
         >
           {/* signature stat tile */}
           <div
             data-tile
-            className="relative col-span-2 row-span-2 flex flex-col justify-between overflow-hidden rounded-[28px] bg-[#14110F] p-7 text-white sm:p-8"
+            className="relative col-span-2 row-span-2 flex flex-col justify-between overflow-hidden rounded-[28px] p-7 text-white sm:p-8"
           >
+            {/* background image / gif — swap the src for your own asset */}
+            <Image
+              src="/36218.gif"
+              alt="Industries we serve"
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              priority
+              className="object-cover"
+              unoptimized
+            />
             <div
               aria-hidden
-              className="pointer-events-none absolute -right-14 -top-14 h-56 w-56 rounded-full"
-              style={{
-                background:
-                  "conic-gradient(from 180deg, #F1E3C4, #B08A55, #8C6A3A, #D9C29B, #F1E3C4)",
-                opacity: 0.18,
-                filter: "blur(2px)",
-              }}
+              className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#14110F]/85 via-[#14110F]/35 to-[#14110F]/10"
             />
             <LayoutGrid
               size={22}
@@ -810,7 +804,7 @@ export default function IndustriesSection() {
             </button>
 
             {/* left — identity panel, background photo swaps per industry */}
-            <div className="relative flex w-full flex-none flex-col justify-between overflow-hidden bg-[#14110F] p-8 text-white sm:w-[38%] sm:p-10">
+            <div className="relative flex h-56 w-full flex-none flex-col justify-between overflow-hidden bg-[#14110F] p-8 text-white sm:h-auto sm:w-[38%] sm:p-10">
               <div ref={modalImageRef} className="absolute inset-0">
                 <Image
                   src={active.image}
@@ -820,34 +814,25 @@ export default function IndustriesSection() {
                   priority
                   className="object-cover"
                 />
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#14110F] via-[#14110F]/75 to-[#14110F]/45"
-                />
               </div>
 
-              <div className="relative">
-                <h3 className="text-2xl leading-tight sm:text-2xl">
-                  {active.name}
-                </h3>
-                <p className="mt-2 text-sm text-white">
-                  {active.items.length} sub-sectors we actively serve
-                </p>
-              </div>
+              {/* spacer keeps prev/next pinned to the bottom now that the
+                  title has moved to the right panel */}
+              <div className="relative" />
 
               {/* prev / next */}
               <div className="relative flex items-center gap-2">
                 <button
                   onClick={() => navigate(-1)}
                   aria-label="Previous industry"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-[#D9C29B] transition-colors hover:border-[#B08A55] hover:text-white"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-black/20 text-white backdrop-blur-sm transition-colors hover:border-[#B08A55] hover:bg-black/40"
                 >
                   <ChevronLeft size={16} strokeWidth={1.75} />
                 </button>
                 <button
                   onClick={() => navigate(1)}
                   aria-label="Next industry"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-[#D9C29B] transition-colors hover:border-[#B08A55] hover:text-white"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-black/20 text-white backdrop-blur-sm transition-colors hover:border-[#B08A55] hover:bg-black/40"
                 >
                   <ChevronRight size={16} strokeWidth={1.75} />
                 </button>
@@ -855,9 +840,16 @@ export default function IndustriesSection() {
             </div>
 
             {/* right — sub-sector list */}
-            <div className="flex-1 overflow-y-auto p-8 sm:p-10">
+            <div className="flex-1 min-h-0 overflow-y-auto p-8 sm:p-10">
               <div ref={modalContentRef}>
-                <span className="mb-5 block text-[11px] tracking-[0.22em] text-[#B7AE9C]">
+                <h3 className="text-2xl leading-tight text-[#14110F] sm:text-2xl">
+                  {active.name}
+                </h3>
+                <p className="mt-2 text-sm text-[#5B564E]">
+                  {active.items.length} sub-sectors we actively serve
+                </p>
+
+                <span className="mb-5 mt-8 block text-[11px] tracking-[0.22em] text-[#B7AE9C]">
                   WHO WE BUILD FOR
                 </span>
                 <div className="flex flex-wrap gap-2.5">

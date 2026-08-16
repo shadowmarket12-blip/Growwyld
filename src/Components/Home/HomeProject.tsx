@@ -37,7 +37,7 @@ const PROJECTS: Project[] = [
       "Infinity Space is a modern interior design studio in Odisha, specializing in stylish, functional, and customized residential and commercial interiors.",
     category: "Website . Digital Marketing",
     year: "2026",
-    image: "/projects/orbit-health.jpg",
+    image: "/Project/p1.png",
     href: "https://infinityspaceodisha.com/",
   },
   {
@@ -47,7 +47,7 @@ const PROJECTS: Project[] = [
       "Blue Edge Trade Venture Pvt. Ltd. is a leading mining company in Odisha, providing reliable mining, mineral trading, and related industrial solutions.",
     category: "Website",
     year: "2026",
-    image: "/projects/veyra-estates.jpg",
+    image: "/Project/p2.png",
     href: "https://blueedgetrade.in/",
   },
   {
@@ -57,7 +57,7 @@ const PROJECTS: Project[] = [
       "J.C. Enterprise is a trusted supplier of electrical and electronic components, offering quality products and reliable solutions for various industrial and commercial needs.",
     category: "E-commerce · Digital Marketing",
     year: "2026",
-    image: "/projects/northfield.jpg",
+    image: "/Project/p3.png",
     href: "https://jcenterprise.co.in/",
     external: true,
   },
@@ -68,7 +68,7 @@ const PROJECTS: Project[] = [
       "WWE Tattoo Studio is a professional tattoo studio in Bhubaneswar specializing in custom tattoos, portrait tattoos, cover-ups, tattoo removal, and piercing with a focus on creativity, precision, and hygiene.",
     category: "Custom Software · Automation",
     year: "2026",
-    image: "/projects/lumen-learning.jpg",
+    image: "/Project/p4.png",
     href: "https://wwetattoostudio.in/",
   },
 ];

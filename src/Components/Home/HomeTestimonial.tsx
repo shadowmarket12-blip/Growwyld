@@ -177,63 +177,18 @@ const Testimonials = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden bg-[#FBFAF7] py-20 sm:py-24 lg:py-32"
+      className="relative overflow-hidden  py-14 sm:py-14 lg:py-20"
     >
       {/* Background texture */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, #14213D 1px, transparent 0)`,
-            backgroundSize: "44px 44px",
-          }}
-        />
-        <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A464]/30 to-transparent" />
-      </div>
 
-      <div className="relative mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
+      <div className="relative mx-auto max-w-7xl px-6 sm:px-10 lg:px-10">
         {/* Header */}
-        <div ref={headingRef} className="mb-14 sm:mb-16">
+        <div ref={headingRef} className="mb-10 sm:mb-10">
           <div className="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-end">
             <div>
-              <div className="inline-flex items-center gap-3 rounded-full border border-[#C9A464]/20 bg-[#C9A464]/5 px-5 py-2">
-                <Sparkles className="h-3.5 w-3.5 text-[#C9A464]" />
-                <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-[#C9A464]">
-                  Client Stories
-                </span>
-              </div>
-
-              <h2 className="mt-6 max-w-2xl font-serif text-3xl leading-tight tracking-tight text-[#14213D] sm:text-4xl lg:text-5xl">
-                Results our clients{" "}
-                <span className="relative inline-block">
-                  <span className="relative z-10 text-[#C9A464]">
-                    talk about
-                  </span>
-                  <span className="absolute -bottom-1 left-0 right-0 h-px bg-gradient-to-r from-[#C9A464]/60 to-transparent" />
-                </span>
+              <h2 className="mt-6 max-w-2xl text-2xl md:text-3xl lg:text-5xl font-medium text-black mb-3 ">
+                Testimonials
               </h2>
-
-              <p className="mt-4 max-w-xl text-base text-[#6B7280]">
-                Every project below is a real business we&apos;ve worked
-                alongside — read what changed for them.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 rounded-2xl border border-[#EDEAE3] bg-white px-6 py-4 shadow-sm">
-              <div className="flex gap-0.5">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="h-4 w-4 fill-[#C9A464] text-[#C9A464]"
-                  />
-                ))}
-              </div>
-              <span className="font-serif text-2xl font-bold text-[#14213D]">
-                5.0
-              </span>
-              <span className="ml-1 text-xs text-[#9CA3AF]">
-                / 200+ reviews
-              </span>
             </div>
           </div>
         </div>

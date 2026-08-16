@@ -8,11 +8,9 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   ArrowUpRight,
-  Gem,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Diamond,
   Zap,
   Target,
   Globe,
@@ -23,7 +21,6 @@ import {
   Briefcase,
   TrendingUp,
   X,
-  Grid3x3,
   ZoomIn,
 } from "lucide-react";
 import "@/Components/Home/style/services-section.css";
@@ -368,39 +365,19 @@ function BrandMark({ size = 56 }: { size?: number }) {
   );
 }
 
-/* -------------------------------------------------------------------- */
-/*  Tilt hook — GSAP quickTo drives real CSS transforms on the card and  */
-/*  its image layer. quickTo is GSAP's purpose-built replacement for a   */
-/*  Framer spring: it interpolates repeated calls smoothly with its own  */
-/*  internal easing, so rapid mousemove updates never feel like jumps.   */
-/* -------------------------------------------------------------------- */
-
 function useCardTilt() {
   const cardRef = useRef<HTMLDivElement>(null);
   const imgWrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const card = cardRef.current;
-    const imgEl = imgWrapRef.current;
-    if (!card || !imgEl) return;
+    if (!card) return;
 
     const quickRotX = gsap.quickTo(card, "rotateX", {
       duration: 0.6,
       ease: "power3.out",
     });
     const quickRotY = gsap.quickTo(card, "rotateY", {
-      duration: 0.6,
-      ease: "power3.out",
-    });
-    const quickImgX = gsap.quickTo(imgEl, "x", {
-      duration: 0.6,
-      ease: "power3.out",
-    });
-    const quickImgY = gsap.quickTo(imgEl, "y", {
-      duration: 0.6,
-      ease: "power3.out",
-    });
-    const quickImgScale = gsap.quickTo(imgEl, "scale", {
       duration: 0.6,
       ease: "power3.out",
     });
@@ -411,10 +388,7 @@ function useCardTilt() {
     let leaveTimer: ReturnType<typeof setTimeout> | null = null;
 
     function handleMove(e: MouseEvent) {
-      // Only pay the compositing cost while actually interacting —
-      // this is the single biggest win against scroll jank: nine
-      // permanently-composited layers (will-change: transform) is
-      // what was making the page feel heavy while scrolling past them.
+      // Only pay the compositing cost while actually interacting.
       card!.style.willChange = "transform";
       if (leaveTimer) {
         clearTimeout(leaveTimer);
@@ -427,11 +401,6 @@ function useCardTilt() {
 
       quickRotX(7 - py * 14); // 0..1 -> 7..-7
       quickRotY(px * 14 - 7); // 0..1 -> -7..7
-      quickImgX((px - 0.5) * 24);
-      quickImgY((py - 0.5) * 24);
-      quickImgScale(
-        1 + Math.max(Math.abs(px - 0.5), Math.abs(py - 0.5)) * 0.16,
-      );
 
       card!.style.setProperty("--mx", `${px * 100}%`);
       card!.style.setProperty("--my", `${py * 100}%`);
@@ -440,9 +409,6 @@ function useCardTilt() {
     function handleLeave() {
       quickRotX(0);
       quickRotY(0);
-      quickImgX(0);
-      quickImgY(0);
-      quickImgScale(1);
       leaveTimer = setTimeout(() => {
         card!.style.willChange = "auto";
       }, 650);
@@ -477,16 +443,6 @@ function CategoryCard({
   onOpen: (i: number) => void;
 }) {
   const { cardRef, imgWrapRef } = useCardTilt();
-  const gallery = cat.gallery && cat.gallery.length ? cat.gallery : [cat.image];
-  const galleryCount = gallery.length;
-  const previewServices = cat.services.slice(0, 2);
-  const remaining = cat.services.length - previewServices.length;
-  // Entrance (alternating left/right 3D swing-in) is orchestrated by the
-  // parent via a single ScrollTrigger.batch — see ServicesSection. Doing it
-  // per-card here meant 9 separate ScrollTriggers, and any card hidden by
-  // the mobile "one active tab at a time" layout had 0 size when its
-  // trigger fired, so it silently never got animated in. Batching from the
-  // parent (and skipping the whole thing under lg breakpoint) fixes both.
 
   return (
     <div
@@ -503,46 +459,17 @@ function CategoryCard({
           onOpen(index);
         }
       }}
-      className={`premium-card-teal group relative flex cursor-pointer flex-col overflow-hidden rounded-[36px] outline-none
-          transition-[transform,box-shadow] duration-500 ease-out
-          hover:-translate-y-2.5 hover:shadow-[0_45px_100px_-24px_rgba(17,62,110,0.4),0_0_0_2px_#22C55E,0_0_0_4px_#113E6E,inset_0_1px_0_rgba(255,255,255,0.7)]
+      className={`premium-card-teal group relative flex cursor-pointer flex-col overflow-hidden rounded-[36px] border-2 border-[#113E6E]/12 bg-white outline-none
+          transition-[transform,box-shadow,border-color] duration-500 ease-out
+          hover:-translate-y-2.5 hover:border-[#22C55E] hover:shadow-[0_45px_100px_-24px_rgba(17,62,110,0.35)]
           ${isMobileActive ? "block" : "hidden"} lg:block`}
       style={{
         perspective: 1400,
         transformStyle: "preserve-3d",
         willChange: "auto",
-        background:
-          "linear-gradient(145deg, #EAF8FC 0%, #D6F1F8 50%, #EAF8FC 100%)",
-        boxShadow:
-          "0 25px 70px -20px rgba(56,189,248,0.28), 0 0 0 2px #22C55E, 0 0 0 4px #113E6E, inset 0 1px 0 rgba(255,255,255,0.6)",
+        boxShadow: "0 20px 55px -25px rgba(17,62,110,0.18)",
       }}
     >
-      {/* Animated conic foil border */}
-      <div
-        className="absolute inset-0 rounded-[36px] opacity-0 transition-opacity duration-700 group-hover:opacity-100"
-        style={{
-          background:
-            "conic-gradient(from var(--angle,0deg), #22C55E, #113E6E, #22C55E, #67e8f9, #22C55E)",
-          padding: "2.5px",
-          mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          maskComposite: "exclude",
-          WebkitMaskComposite: "xor",
-        }}
-      />
-
-      {/* Inner gradient background */}
-      <div className="absolute inset-[2.5px] rounded-[33.5px] bg-gradient-to-b from-[#EAF8FC] via-[#D6F1F8] to-[#EAF8FC] pointer-events-none" />
-
-      {/* Subtle pattern overlay */}
-      <div
-        className="absolute inset-[2.5px] rounded-[33.5px] opacity-[0.05] pointer-events-none"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 20% 30%, #113E6E 0.5px, transparent 0.5px), radial-gradient(circle at 80% 70%, #22C55E 0.5px, transparent 0.5px)",
-          backgroundSize: "30px 30px",
-        }}
-      />
-
       {/* Ambient floating particles */}
       <div className="pointer-events-none absolute inset-0 z-[5] overflow-hidden rounded-[36px] opacity-0 transition-opacity duration-700 group-hover:opacity-100">
         {[...Array(6)].map((_, p) => (
@@ -558,46 +485,25 @@ function CategoryCard({
         ))}
       </div>
 
-      {/* ---------- Hero image with parallax + overlaid title ---------- */}
+      {/* ---------- Hero image (static — no mousemove pan/zoom) ---------- */}
       <div
         className="relative h-60 w-full overflow-hidden sm:h-68 group/image"
-        style={{ transform: "translateZ(40px)" }}
+        style={{ transform: "translateZ(10px)" }}
       >
-        <div
-          ref={imgWrapRef}
-          className="absolute inset-0 will-change-transform"
-        >
+        <div ref={imgWrapRef} className="absolute inset-0">
           <Image
             src={cat.image}
             alt={cat.title}
             fill
-            sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 50vw, 55vw"
-            className="object-cover transition-[filter] duration-[1200ms] ease-out group-hover/image:brightness-[0.7]"
+            sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 50vw, 15vw"
+            className="object-cover"
           />
         </div>
 
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#113E6E] via-[#113E6E]/45 to-transparent" />
-        <div className="pointer-events-none absolute inset-0 -translate-x-full opacity-0 transition-[opacity,transform] duration-[1400ms] ease-out group-hover:translate-x-full group-hover:opacity-100 bg-gradient-to-r from-transparent via-[#22C55E]/20 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
 
         <div className="absolute inset-3 rounded-2xl border border-white/20 pointer-events-none" />
         <div className="absolute inset-5 rounded-xl border border-[#22C55E]/25 pointer-events-none" />
-
-        <div className="absolute top-7 left-7 right-7 flex items-center justify-between">
-          <span className="relative flex h-11 items-center gap-2 rounded-xl bg-gradient-to-br from-[#113E6E] via-[#1a4a7a] to-[#22C55E] px-3.5 shadow-xl shadow-[#113E6E]/30">
-            <span className="font-serif text-[15px] italic leading-none text-white/90">
-              {String(index + 1).padStart(2, "0")}
-            </span>
-            <span className="h-4 w-px bg-white/30" />
-            <Gem className="h-3.5 w-3.5 text-white" />
-          </span>
-
-          {galleryCount > 1 && (
-            <span className="flex items-center gap-1.5 rounded-full border border-white/25 bg-white/15 px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-white backdrop-blur-md">
-              <Grid3x3 className="h-3 w-3" />
-              {galleryCount} photos
-            </span>
-          )}
-        </div>
 
         <div className="absolute bottom-7 left-7 right-7">
           <h3 className="text-2xl leading-tight text-white drop-shadow-2xl sm:text-2xl tracking-tight">
@@ -606,59 +512,16 @@ function CategoryCard({
         </div>
       </div>
 
-      {/* pointer-following glare, positioned by the same quickTo CSS vars */}
-      <div
-        className="pointer-events-none absolute inset-0 rounded-[36px] opacity-0 transition-opacity duration-500 group-hover:opacity-100 z-20"
-        style={{
-          background:
-            "radial-gradient(900px circle at var(--mx,50%) var(--my,50%), rgba(17,62,110,0.1), transparent 45%)",
-        }}
-      />
-
       {/* ---------- Body ---------- */}
       <div
         className="relative flex flex-1 flex-col px-8 pb-8 pt-7 z-10"
         style={{ transform: "translateZ(20px)" }}
       >
-        <div className="relative flex items-center gap-4 mb-6">
-          <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#113E6E]/25 to-transparent" />
-          <Diamond className="h-3 w-3 text-[#113E6E]/45" />
-          <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#113E6E]/25 to-transparent" />
-        </div>
-
         <div className="flex flex-1 flex-col justify-center gap-4">
-          <span className="text-[10px] uppercase tracking-[0.3em] text-[#113E6E]/45">
-            What&rsquo;s inside
-          </span>
-
-          <p className="text-[13.5px] leading-relaxed text-[#113E6E]/70">
-            {previewServices.join(" · ")}
-            {remaining > 0 && (
-              <span className="text-[#0f8f4a]"> · +{remaining} more</span>
-            )}
-          </p>
-
           <div className="group/view relative flex items-center justify-between gap-3 rounded-2xl border border-[#113E6E]/15 bg-white/70 px-5 py-4 transition-all duration-500 group-hover:border-[#22C55E]/70 group-hover:bg-white group-hover:shadow-[0_16px_40px_-20px_rgba(17,62,110,0.35)]">
             <span className="flex items-center gap-3">
-              <span className="flex -space-x-3">
-                {gallery.slice(0, 3).map((src, i) => (
-                  <span
-                    key={src}
-                    className="relative h-8 w-8 overflow-hidden rounded-full ring-2 ring-white shadow-sm"
-                    style={{ zIndex: 3 - i }}
-                  >
-                    <Image
-                      src={src}
-                      alt=""
-                      fill
-                      sizes="32px"
-                      className="object-cover"
-                    />
-                  </span>
-                ))}
-              </span>
-              <span className="text-[12px] font-medium uppercase tracking-[0.2em] text-[#113E6E] transition-colors duration-300 group-hover:text-[#0f8f4a]">
-                View all services
+              <span className="text-[12px] font-medium uppercase tracking-[0.2em] text-black transition-colors duration-300 ">
+                services
               </span>
             </span>
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#113E6E] text-white transition-all duration-500 group-hover:rotate-45 group-hover:bg-[#22C55E]">
@@ -669,23 +532,15 @@ function CategoryCard({
 
         <div className="mt-7 flex items-center justify-between border-t border-[#113E6E]/15 pt-6">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#113E6E]/10 border border-[#113E6E]/20">
+            <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full  border border-black/2">
               <Image
-                src="/GT Transparent logo.png"
-                alt="Description"
-                width={10}
-                height={10}
-                className="rounded-full"
+                src={BRAND.logo}
+                alt={`${BRAND.name} logo`}
+                fill
+                sizes="32px"
+                className="object-contain p-1"
               />
             </span>
-            <div className="flex flex-col">
-              <span className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-[#113E6E]/70">
-                {BRAND.name}
-              </span>
-              <span className="text-[8px] tracking-[0.15em] text-[#113E6E]/50 uppercase">
-                Excellence Guaranteed
-              </span>
-            </div>
           </div>
           <Link
             href="/contact"
@@ -696,7 +551,7 @@ function CategoryCard({
               Explore Service
               <span className="absolute bottom-0 left-0 h-[1.5px] w-0 bg-[#22C55E] transition-all duration-300 group-hover/cta:w-full" />
             </span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#113E6E] to-[#22C55E] shadow-lg shadow-[#113E6E]/25 transition-all duration-300 group-hover/cta:rotate-45 group-hover/cta:shadow-xl group-hover/cta:shadow-[#22C55E]/40">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#113E6E] shadow-lg shadow-[#113E6E]/25 transition-all duration-300 group-hover/cta:rotate-45 group-hover/cta:bg-[#22C55E] group-hover/cta:shadow-xl group-hover/cta:shadow-[#22C55E]/40">
               <ArrowUpRight className="h-3.5 w-3.5 text-white" />
             </span>
           </Link>
@@ -705,12 +560,6 @@ function CategoryCard({
     </div>
   );
 }
-
-/* -------------------------------------------------------------------- */
-/*  GalleryMosaic — bento grid that opens into a swipeable lightbox.     */
-/*  No AnimatePresence: open/close/crossfade are hand-rolled with GSAP   */
-/*  timelines so unmounting still gets to play an exit animation.        */
-/* -------------------------------------------------------------------- */
 
 function GalleryMosaic({ images, title }: { images: string[]; title: string }) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -888,14 +737,14 @@ function GalleryMosaic({ images, title }: { images: string[]; title: string }) {
           </div>
 
           <div
-            className="relative flex w-full max-w-3xl flex-1 items-center justify-center overflow-hidden"
+            className="relative flex w-full max-w-3xl flex-1 items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
             {images.length > 1 && (
               <button
                 onClick={() => go(-1)}
                 aria-label="Previous image"
-                className="absolute left-0 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md transition-colors hover:bg-[#22C55E] sm:-left-4"
+                className="absolute left-0 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md transition-colors hover:bg-[#22C55E] sm:-left-4"
               >
                 <ChevronLeft size={18} strokeWidth={1.75} />
               </button>
@@ -925,7 +774,7 @@ function GalleryMosaic({ images, title }: { images: string[]; title: string }) {
               <button
                 onClick={() => go(1)}
                 aria-label="Next image"
-                className="absolute right-0 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md transition-colors hover:bg-[#22C55E] sm:-right-4"
+                className="absolute right-0 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md transition-colors hover:bg-[#22C55E] sm:-right-4"
               >
                 <ChevronRight size={18} strokeWidth={1.75} />
               </button>
@@ -1063,13 +912,6 @@ export default function ServicesSection() {
 
   useLenisGsap();
 
-  /* ------------------------------------------------------------------ */
-  /*  Card entrance: alternating left/right 3D swing-in.                 */
-  /*  Desktop grid only — one ScrollTrigger.batch instead of one         */
-  /*  ScrollTrigger per card (9 -> 1), and gsap.matchMedia re-runs        */
-  /*  automatically on resize, so crossing the lg breakpoint never       */
-  /*  leaves a card stuck at opacity 0.                                  */
-  /* ------------------------------------------------------------------ */
   useEffect(() => {
     const mm = gsap.matchMedia();
 
@@ -1136,8 +978,6 @@ export default function ServicesSection() {
       };
     });
 
-    // Layout can settle a beat after mount (images/fonts) — make sure the
-    // batch triggers are measured against final positions.
     const t = setTimeout(() => ScrollTrigger.refresh(), 300);
 
     return () => {
@@ -1168,10 +1008,26 @@ export default function ServicesSection() {
       const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
       const target = cardRefs.current[idx];
       if (!target) return;
-      target.scrollIntoView({
-        behavior: "smooth",
-        block: isDesktop ? "center" : "start",
-      });
+
+      if (isDesktop) {
+        target.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      } else {
+        // Mobile: scroll so the card appears at the top of the viewport
+        // with some offset for the tabs
+        const targetRect = target.getBoundingClientRect();
+        const scrollTop =
+          window.pageYOffset || document.documentElement.scrollTop;
+        const targetTop = targetRect.top + scrollTop;
+        const offset = 120; // Adjust this value to control how much space from top
+
+        window.scrollTo({
+          top: targetTop - offset,
+          behavior: "smooth",
+        });
+      }
     });
   };
 
@@ -1204,25 +1060,12 @@ export default function ServicesSection() {
   return (
     <section
       id="services"
-      className="relative overflow-hidden bg-white py-24 sm:py-28 md:py-36"
+      className="relative overflow-hidden bg-white py-24 sm:py-28 md:py-30"
     >
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 w-[1000px] h-[1000px] bg-gradient-to-bl from-[#22C55E]/[0.08] to-transparent rounded-full blur-3xl animate-pulse-slow" />
+        {/* <div className="absolute top-0 right-0 w-[1000px] h-[1000px] bg-gradient-to-bl from-[#22C55E]/[0.08] to-transparent rounded-full blur-3xl animate-pulse-slow" /> */}
         <div className="absolute bottom-0 left-0 w-[1000px] h-[1000px] bg-gradient-to-tr from-[#113E6E]/[0.08] to-transparent rounded-full blur-3xl" />
-        <div
-          className="absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage: `radial-gradient(circle at 25% 25%, #113E6E 1px, transparent 1px), radial-gradient(circle at 75% 75%, #22C55E 1px, transparent 1px)`,
-            backgroundSize: "80px 80px",
-          }}
-        />
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `linear-gradient(#113E6E 1px, transparent 1px), linear-gradient(to right, #22C55E 1px, transparent 1px)`,
-            backgroundSize: "120px 120px",
-          }}
-        />
+
         <div className="absolute top-20 left-10 w-32 h-32 bg-[#22C55E]/[0.06] rounded-full blur-2xl animate-float" />
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-[#113E6E]/[0.07] rounded-full blur-2xl animate-float-delayed" />
       </div>
@@ -1239,9 +1082,6 @@ export default function ServicesSection() {
             <div className="leading-tight">
               <div className="text-[1.4rem] tracking-tight text-[#113E6E] sm:text-2xl font-medium">
                 {BRAND.name}
-              </div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.32em] text-[#113E6E]/60">
-                {BRAND.tagline}
               </div>
             </div>
           </div>
@@ -1327,11 +1167,6 @@ export default function ServicesSection() {
         </div>
       </div>
 
-      {/* ------------------------------------------------------ */}
-      {/*  Modal — manually mounted/unmounted; GSAP plays the      */}
-      {/*  entrance every time it mounts or the category changes,  */}
-      {/*  and an exit tween before the DOM node is removed.       */}
-      {/* ------------------------------------------------------ */}
       {modalMounted && modalCategory && (
         <div
           role="dialog"

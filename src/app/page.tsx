@@ -5,7 +5,7 @@ import Testimonials from "@/Components/Home/HomeTestimonial";
 import Services from "@/Components/Home/Service";
 import ServicesSection from "@/Components/Home/ServiceMain";
 import StatisticsSection from "@/Components/Home/Statistics";
-// import WhyChooseSection from "@/Components/Home/WhyChooseUs";
+import WhyChooseSection from "@/Components/Home/WhyChooseUs";
 import ProcessSection from "@/Components/Process/Process";
 import TechStackSection from "@/Components/TechStack/TechStack";
 import IndustriesSection from "@/Components/WeServe/WeServe";
@@ -15,15 +15,15 @@ export default function Home() {
     <div>
       <main>
         <Services />
-        {/* <ProjectsSection /> */}
-        {/* <StatisticsSection /> */}
-        {/* <ProcessSection /> */}
+        <StatisticsSection />
+        <ProjectsSection />
+        <TechStackSection />
+        <ProcessSection />
         <ServicesSection />
-        {/* <TechStackSection /> */}
         <IndustriesSection />
         <Testimonials />
-        <CTASection />
         {/* <WhyChooseSection /> */}
+        <CTASection />
         <FAQ />
       </main>
     </div>

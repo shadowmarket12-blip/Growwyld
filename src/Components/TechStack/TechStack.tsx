@@ -402,45 +402,18 @@ const TechStackSection = () => {
       className={`${fraunces.variable} ${inter.variable} relative w-full overflow-hidden bg-white py-15 sm:py-17 lg:py-18`}
       style={{ fontFamily: "var(--font-body)" }}
     >
-      {/* ambient decor, matches the rest of the site */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-40 top-10 h-[32rem] w-[32rem] rounded-full border border-[#EDE7DA] opacity-60"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-48 bottom-0 h-[36rem] w-[36rem] rounded-full border border-[#EDE7DA] opacity-40"
-      />
-
       <div className="relative mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
         {/* ---------------------------------------------------- */}
-        {/*  Header                                                */}
+        {/*  Header - Left aligned                                 */}
         {/* ---------------------------------------------------- */}
-        <div ref={headingRef} className="mx-auto max-w-3xl text-center">
-          <h1 className="text-[2rem] leading-[1] tracking-tight text-[#14110F] sm:text-4xl lg:text-5xl text-left">
-            Our TechStark
+        <div ref={headingRef} className="max-w-3xl text-left">
+          <h1 className="tracking-tight text-black text-2xl md:text-3xl lg:text-5xl font-medium text-black mb-3">
+            Technologies We Work With
           </h1>
-          <p
-            data-reveal
-            className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[#5B564E] sm:text-lg"
-          >
-            Powerful, proven technologies we master to turn ideas into
-            exceptional digital products.
-          </p>
-
-          <p
-            data-reveal
-            className="mt-5 text-[11px] tracking-[0.25em] text-[#B7AE9C]"
-          >
-            {categories.length} DISCIPLINES · {TOTAL_TECH} TECHNOLOGIES
-          </p>
         </div>
 
-        {/* ---------------------------------------------------- */}
-        {/*  Category tabs                                         */}
-        {/* ---------------------------------------------------- */}
         <div
-          className="mt-14 flex justify-start gap-2 overflow-x-auto pb-3 sm:mt-16 sm:justify-center"
+          className="mt-14 flex justify-start gap-2 overflow-x-auto pb-3 sm:mt-16 sm:justify-start"
           style={{ scrollbarWidth: "none" }}
         >
           {categories.map((category) => {
@@ -536,7 +509,7 @@ const TechStackSection = () => {
         {/* ---------------------------------------------------- */}
         {/*  Category dots                                         */}
         {/* ---------------------------------------------------- */}
-        <div className="mt-12 flex justify-center gap-2">
+        <div className="mt-12 flex justify-start gap-2">
           {categories.map((category) => (
             <button
               key={category.name}

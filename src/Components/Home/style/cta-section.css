@@ -1,0 +1,88 @@
+/* cta-section.css */
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-slower {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-star {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes float-orb {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-30px);
+  }
+}
+
+/* Ring animations */
+.animate-spin-40s {
+  animation: spin-slow 40s linear infinite;
+}
+
+.animate-spin-30s-reverse {
+  animation: spin-slower 30s linear infinite reverse;
+}
+
+.animate-spin-25s {
+  animation: spin-slow 25s linear infinite;
+}
+
+.animate-spin-20s-reverse {
+  animation: spin-slower 20s linear infinite reverse;
+}
+
+/* Star pulse animations */
+.star-pulse {
+  animation: pulse-star 2s ease-in-out infinite;
+}
+
+.star-pulse-delay-300 {
+  animation: pulse-star 2s ease-in-out 0.3s infinite;
+}
+
+.star-pulse-delay-500 {
+  animation: pulse-star 2s ease-in-out 0.5s infinite;
+}
+
+/* Floating orb */
+.float-orb {
+  animation: float-orb 3s ease-in-out infinite;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin-40s,
+  .animate-spin-30s-reverse,
+  .animate-spin-25s,
+  .animate-spin-20s-reverse,
+  .star-pulse,
+  .star-pulse-delay-300,
+  .star-pulse-delay-500,
+  .float-orb {
+    animation: none;
+  }
+}

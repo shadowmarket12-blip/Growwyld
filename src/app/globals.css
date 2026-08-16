@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+html {
+  scroll-behavior: auto;
+  background-color: #ffffff;
+}
+
+html,
+body {
+  overscroll-behavior: none;
+  width: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background-color: #22e3b2;
+  color: #0b0f14;
+}
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+html.lenis.lenis-smooth {
+  scroll-behavior: auto;
+}
+html.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+input,
+textarea {
+  @apply transition-all duration-300;
+}

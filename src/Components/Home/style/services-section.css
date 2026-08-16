@@ -1,0 +1,172 @@
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-16px);
+  }
+}
+
+@keyframes logoFloat {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(-1.2deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(1.2deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ---------------- Moving brand logo ---------------- */
+.brand-logo-scene {
+  perspective: 800px;
+}
+
+.brand-logo-float {
+  animation: logoFloat 5s ease-in-out infinite;
+  transform-style: preserve-3d;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: rotateX(var(--tiltX, 0deg)) rotateY(var(--tiltY, 0deg));
+}
+
+.brand-logo-glow {
+  position: absolute;
+  inset: -14px;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgba(201, 164, 100, 0.35) 0%,
+    transparent 70%
+  );
+  filter: blur(10px);
+  animation: float 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo-float {
+    animation: none;
+  }
+  .brand-logo-glow {
+    animation: none;
+  }
+}
+
+/* ---------------- Luxury card foil rim ---------------- */
+.foil-card {
+  position: relative;
+}
+
+.foil-rim {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    transparent 0%,
+    rgba(201, 164, 100, 0.95) 10%,
+    transparent 24%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.foil-card:hover .foil-rim {
+  opacity: 1;
+}
+
+/* ---------------- Shimmer sweep on the count badge ---------------- */
+.shimmer-badge {
+  background: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0.14) 30%,
+    rgba(232, 206, 148, 0.55) 50%,
+    rgba(255, 255, 255, 0.14) 70%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3.2s ease-in-out infinite;
+}
+
+/* ---------------- Card scroll offset (mobile/tablet tab fix) ---------------- */
+/* Ensures scrollIntoView lands the card just below a fixed navbar instead of
+   flush against the top edge / cropped under the header. Adjust to match
+   your actual navbar height. */
+.service-card-anchor {
+  scroll-margin-top: 96px;
+}
+
+@media (min-width: 1024px) {
+  .service-card-anchor {
+    scroll-margin-top: 24px;
+  }
+}
+/* Add this to your existing services-section.css
+   Powers the ambient floating "sparkle" particles on the premium card hover. */
+
+.card-particle {
+  position: absolute;
+  bottom: -10%;
+  width: 3px;
+  height: 3px;
+  border-radius: 9999px;
+  background: #22c55e;
+  box-shadow: 0 0 6px 1px rgba(34, 197, 94, 0.8);
+  opacity: 0;
+  animation-name: card-particle-float;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.card-particle:nth-child(2n) {
+  background: #113e6e;
+  box-shadow: 0 0 6px 1px rgba(17, 62, 110, 0.6);
+  width: 2px;
+  height: 2px;
+}
+
+.card-particle:nth-child(3n) {
+  background: #67e8f9;
+  box-shadow: 0 0 8px 1px rgba(103, 232, 249, 0.7);
+}
+
+@keyframes card-particle-float {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-260px) translateX(14px) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Optional: respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .card-particle {
+    animation: none !important;
+    display: none;
+  }
+}

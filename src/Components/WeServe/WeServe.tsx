@@ -607,11 +607,11 @@ export default function IndustriesSection() {
             data-reveal
             className="text-2xl md:text-3xl lg:text-5xl font-medium text-black"
           >
-            Industries We <span className="italic text-[#091b2d]">Serve</span>
+            Industries We <span className=" text-black">Serve</span>
           </h2>
           <p
             data-reveal
-            className="mt-6 max-w-2xl text-base leading-relaxed text-black sm:text-lg text-justify [text-align-last:left]"
+            className="mt-6 max-w-2xl text-base leading-relaxed text-black sm:text-lg text-left"
           >
             From healthcare providers and educational institutions to real
             estate companies, e-commerce brands, manufacturers, and technology
@@ -646,42 +646,6 @@ export default function IndustriesSection() {
               className="object-cover"
               unoptimized
             />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#14110F]/85 via-[#14110F]/35 to-[#14110F]/10"
-            />
-            <LayoutGrid
-              size={22}
-              strokeWidth={1.6}
-              className="relative text-[#B08A55]"
-            />
-            <div className="relative">
-              <div className="flex items-baseline gap-2">
-                <span
-                  className="text-5xl sm:text-6xl"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  {N}
-                </span>
-                <span className="text-sm tracking-[0.15em] text-[#B7AE9C]">
-                  INDUSTRIES
-                </span>
-              </div>
-              <div className="mt-3 flex items-baseline gap-2">
-                <span
-                  className="text-3xl sm:text-4xl"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  {TOTAL_SUBSECTORS}+
-                </span>
-                <span className="text-sm tracking-[0.15em] text-[#B7AE9C]">
-                  SUB-SECTORS
-                </span>
-              </div>
-              <p className="mt-4 max-w-[22ch] text-sm leading-relaxed text-[#B7AE9C]">
-                Tap any sector to explore who we build for.
-              </p>
-            </div>
           </div>
 
           {INDUSTRIES.map((industry, i) => {
@@ -729,15 +693,9 @@ export default function IndustriesSection() {
                   {/* icon badge removed so the photo reads clean —
                       title + count sit directly on the image */}
                   <div>
-                    <h3
-                      className="text-[15px] leading-snug text-white sm:text-base"
-                      style={{ fontFamily: "var(--font-display)" }}
-                    >
+                    <h3 className="text-[15px] leading-snug text-white sm:text-base">
                       {industry.name}
                     </h3>
-                    <p className="mt-1 text-xs text-[#D9C29B]/80">
-                      {industry.items.length} sub-sectors
-                    </p>
                   </div>
                 </div>
               </button>
@@ -816,8 +774,6 @@ export default function IndustriesSection() {
                 />
               </div>
 
-              {/* spacer keeps prev/next pinned to the bottom now that the
-                  title has moved to the right panel */}
               <div className="relative" />
 
               {/* prev / next */}
@@ -845,9 +801,9 @@ export default function IndustriesSection() {
                 <h3 className="text-2xl leading-tight text-[#14110F] sm:text-2xl">
                   {active.name}
                 </h3>
-                <p className="mt-2 text-sm text-[#5B564E]">
+                {/* <p className="mt-2 text-sm text-black">
                   {active.items.length} sub-sectors we actively serve
-                </p>
+                </p> */}
 
                 <span className="mb-5 mt-8 block text-[11px] tracking-[0.22em] text-[#B7AE9C]">
                   WHO WE BUILD FOR
@@ -856,19 +812,19 @@ export default function IndustriesSection() {
                   {active.items.map((item) => (
                     <span
                       key={item}
-                      className="rounded-full border border-[#EAE4D8] bg-[#FBFAF7] px-4 py-2 text-sm text-[#5B564E] transition-colors duration-300 hover:border-[#D9C29B] hover:text-[#14110F]"
+                      className="rounded-full border border-[#EAE4D8] bg-[#FBFAF7] px-4 py-2 text-sm text-black transition-colors duration-300 hover:border-[#D9C29B] hover:text-[#14110F]"
                     >
                       {item}
                     </span>
                   ))}
                 </div>
 
-                <span className="mt-8 mb-4 block h-px w-16 bg-[#B08A55]/50" />
-                <p className="text-sm leading-relaxed text-[#5B564E]">
+                {/* <span className="mt-8 mb-4 block h-px w-16 bg-[#B08A55]/50" /> */}
+                {/* <p className="text-sm leading-relaxed text-[#5B564E]">
                   Have a project in this space? We&rsquo;ll tailor a digital
                   strategy built around how {active.name.toLowerCase()} actually
                   operate — from visibility to conversion.
-                </p>
+                </p> */}
               </div>
             </div>
           </div>

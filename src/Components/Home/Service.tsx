@@ -94,9 +94,6 @@ export default function Services() {
                   {s.desc}
                 </p>
               </div>
-              <span className="mt-8 inline-block font-mono text-[11px] uppercase tracking-widest text-ink/40 transition-colors duration-300 group-hover:text-signal">
-                Learn more →
-              </span>
             </div>
           ))}
         </div>

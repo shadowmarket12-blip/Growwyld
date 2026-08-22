@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import { Star, Quote, Sparkles, ArrowUpRight } from "lucide-react";
+import { Star, Quote, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -62,7 +62,7 @@ const testimonials: Testimonial[] = [
   },
 ];
 
-const AUTOPLAY_MS = 6000;
+const AUTOPLAY_MS = 5500;
 
 const initials = (name: string) =>
   name
@@ -70,16 +70,25 @@ const initials = (name: string) =>
     .map((n) => n[0])
     .join("");
 
+// shortest signed circular distance from `active` to `i` within a list of length `len`
+const circularDelta = (i: number, active: number, len: number) => {
+  let d = i - active;
+  if (d > len / 2) d -= len;
+  if (d < -len / 2) d += len;
+  return d;
+};
+
 const Testimonials = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const active = testimonials[activeIndex];
+  const len = testimonials.length;
+
+  const touchStartX = useRef<number | null>(null);
 
   // Entrance animation
   useEffect(() => {
@@ -89,7 +98,7 @@ const Testimonials = () => {
 
     const ctx = gsap.context(() => {
       if (prefersReducedMotion) {
-        gsap.set([headingRef.current, panelRef.current], { opacity: 1, y: 0 });
+        gsap.set([headingRef.current, stageRef.current], { opacity: 1, y: 0 });
         return;
       }
 
@@ -106,36 +115,21 @@ const Testimonials = () => {
       );
 
       gsap.fromTo(
-        panelRef.current,
+        stageRef.current,
         { opacity: 0, y: 60 },
         {
           opacity: 1,
           y: 0,
           duration: 0.9,
           ease: "power3.out",
-          scrollTrigger: { trigger: panelRef.current, start: "top 82%" },
+          delay: 0.1,
+          scrollTrigger: { trigger: stageRef.current, start: "top 82%" },
         },
       );
     }, sectionRef);
 
     return () => ctx.revert();
   }, []);
-
-  // Crossfade content whenever activeIndex changes
-  useEffect(() => {
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    if (!contentRef.current) return;
-
-    if (prefersReducedMotion) return;
-
-    gsap.fromTo(
-      contentRef.current,
-      { opacity: 0, y: 16 },
-      { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" },
-    );
-  }, [activeIndex]);
 
   // Autoplay + progress bar
   useEffect(() => {
@@ -161,187 +155,265 @@ const Testimonials = () => {
     }
 
     const timer = setTimeout(() => {
-      setActiveIndex((prev) => (prev + 1) % testimonials.length);
+      setActiveIndex((prev) => (prev + 1) % len);
     }, AUTOPLAY_MS);
 
     return () => {
       clearTimeout(timer);
       if (progressRef.current) gsap.killTweensOf(progressRef.current);
     };
-  }, [activeIndex, isPaused]);
+  }, [activeIndex, isPaused, len]);
 
-  const selectTestimonial = useCallback((index: number) => {
-    setActiveIndex(index);
-  }, []);
+  const goTo = useCallback(
+    (index: number) => {
+      setActiveIndex(((index % len) + len) % len);
+    },
+    [len],
+  );
+
+  const goPrev = useCallback(() => goTo(activeIndex - 1), [activeIndex, goTo]);
+  const goNext = useCallback(() => goTo(activeIndex + 1), [activeIndex, goTo]);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    setIsPaused(true);
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    if (delta > 40) goPrev();
+    else if (delta < -40) goNext();
+    touchStartX.current = null;
+    setIsPaused(false);
+  };
+
+  const active = testimonials[activeIndex];
 
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden  py-14 sm:py-14 lg:py-20"
+      className="relative overflow-hidden  py-16 sm:py-20 lg:py-28"
     >
-      {/* Background texture */}
+      {/* Ambient backdrop */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.05]"
+        style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, #14213D 1px, transparent 0)`,
+          backgroundSize: "36px 36px",
+        }}
+      />
+      <div
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[560px] w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[140px] transition-colors duration-700"
+        style={{ backgroundColor: `${active.accent}1a` }}
+      />
 
       <div className="relative mx-auto max-w-7xl px-6 sm:px-10 lg:px-10">
-        {/* Header */}
-        <div ref={headingRef} className="mb-10 sm:mb-10">
-          <div className="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-end">
-            <div>
-              <h2 className="mt-6 max-w-2xl text-2xl md:text-3xl lg:text-5xl font-medium text-black mb-3 ">
-                Testimonials
-              </h2>
-            </div>
-          </div>
-        </div>
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[340px_1fr] lg:gap-8 lg:items-center">
+          {/* Left: heading + controls */}
+          <div ref={headingRef} className="lg:pr-4">
+            <h2 className="mt-6 max-w-2xl text-2xl md:text-3xl lg:text-5xl font-medium text-black mb-3">
+              Testimonials
+            </h2>
 
-        {/* Spotlight layout */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[300px_1fr]">
-          {/* Client rail */}
-          <div className="flex gap-3 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible lg:pb-0">
-            {testimonials.map((t, index) => {
-              const isActive = index === activeIndex;
-              return (
-                <button
-                  key={t.id}
-                  onClick={() => selectTestimonial(index)}
-                  className={`group relative flex min-w-[220px] flex-shrink-0 items-center gap-4 rounded-2xl border px-4 py-4 text-left transition-all duration-300 lg:min-w-0 ${
-                    isActive
-                      ? "border-[#14213D] bg-[#14213D] shadow-[0_8px_24px_-8px_rgba(20,33,61,0.35)]"
-                      : "border-[#EDEAE3] bg-white hover:border-[#C9A464]/40"
-                  }`}
-                >
-                  <span
-                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl font-serif text-sm font-bold transition-colors duration-300"
-                    style={{
-                      backgroundColor: isActive ? `${t.accent}25` : "#F5F3EE",
-                      color: isActive ? t.accent : "#14213D",
-                    }}
-                  >
-                    {initials(t.name)}
-                  </span>
-                  <span className="min-w-0">
-                    <span
-                      className={`block truncate text-sm font-semibold transition-colors duration-300 ${
-                        isActive ? "text-white" : "text-[#14213D]"
-                      }`}
-                    >
-                      {t.name}
-                    </span>
-                    <span
-                      className={`block truncate text-xs transition-colors duration-300 ${
-                        isActive ? "text-white/60" : "text-[#9CA3AF]"
-                      }`}
-                    >
-                      {t.company}
-                    </span>
-                  </span>
-
-                  {/* active indicator */}
-                  <span
-                    className={`absolute left-0 top-1/2 hidden h-8 w-1 -translate-y-1/2 rounded-r-full transition-opacity duration-300 lg:block ${
-                      isActive ? "opacity-100" : "opacity-0"
-                    }`}
-                    style={{ backgroundColor: t.accent }}
-                  />
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Spotlight panel */}
-          <div
-            ref={panelRef}
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
-            className="relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-3xl bg-[#14213D] p-8 sm:p-12"
-          >
-            {/* Ambient glow tied to active client's accent */}
-            <div
-              className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full blur-3xl transition-colors duration-700"
-              style={{ backgroundColor: `${active.accent}22` }}
-            />
-            <div
-              className="pointer-events-none absolute -bottom-32 -left-16 h-64 w-64 rounded-full blur-3xl transition-colors duration-700"
-              style={{ backgroundColor: `${active.accent}14` }}
-            />
-            <div
-              className="pointer-events-none absolute inset-0 opacity-[0.04]"
-              style={{
-                backgroundImage: `radial-gradient(circle at 1px 1px, #FFFFFF 1px, transparent 0)`,
-                backgroundSize: "32px 32px",
-              }}
-            />
-
-            <div ref={contentRef} className="relative z-10">
-              <div className="mb-8 flex items-start justify-between">
-                <Quote
-                  className="h-12 w-12 transition-colors duration-500"
-                  style={{ color: `${active.accent}55` }}
-                />
-                <div className="flex items-center gap-0.5">
-                  {[...Array(active.rating)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="h-4 w-4"
-                      style={{ fill: active.accent, color: active.accent }}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <blockquote>
-                <p className="font-serif text-xl leading-relaxed text-[#F5F3EE] sm:text-2xl sm:leading-relaxed">
-                  {active.content}
-                </p>
-              </blockquote>
-            </div>
-
-            <div className="relative z-10 mt-10 flex items-end justify-between gap-6">
-              <div>
-                <h4 className="font-serif text-lg font-semibold text-white">
+            {/* Active client summary */}
+            <div className="mt-8 flex items-center gap-3">
+              <span
+                className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl font-serif text-sm font-bold ring-1 ring-inset transition-colors duration-500"
+                style={{
+                  backgroundColor: `${active.accent}1f`,
+                  color: active.accent,
+                  boxShadow: `inset 0 0 0 1px ${active.accent}40`,
+                }}
+              >
+                {initials(active.name)}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-[#14213D]">
                   {active.name}
-                </h4>
-                <p className="text-sm text-white/50">
+                </p>
+                <p className="truncate text-xs text-[#9CA3AF]">
                   {active.role} ·{" "}
                   <span style={{ color: active.accent }}>{active.company}</span>
                 </p>
               </div>
+            </div>
 
-              <div
-                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border transition-colors duration-500"
-                style={{ borderColor: `${active.accent}40` }}
-              >
-                <ArrowUpRight
-                  className="h-4 w-4 transition-colors duration-500"
-                  style={{ color: active.accent }}
-                />
+            {/* Controls: arrows + counter */}
+            <div className="mt-8 flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={goPrev}
+                  aria-label="Previous testimonial"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[#14213D]/15 bg-white text-[#14213D] transition-all duration-300 hover:border-[#14213D] hover:bg-[#14213D] hover:text-white"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={goNext}
+                  aria-label="Next testimonial"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[#14213D]/15 bg-white text-[#14213D] transition-all duration-300 hover:border-[#14213D] hover:bg-[#14213D] hover:text-white"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="flex items-baseline gap-1 font-serif text-sm text-[#9CA3AF]">
+                <span className="text-base font-semibold text-[#14213D]">
+                  {String(activeIndex + 1).padStart(2, "0")}
+                </span>
+                <span>/ {String(len).padStart(2, "0")}</span>
               </div>
             </div>
 
-            {/* Autoplay progress bar */}
-            <div className="relative z-10 mt-8 flex gap-1.5">
+            {/* Dots */}
+            <div className="mt-6 flex items-center gap-2">
               {testimonials.map((t, index) => (
-                <div
+                <button
                   key={t.id}
-                  className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/10"
-                >
-                  {index === activeIndex && (
-                    <div
-                      ref={progressRef}
-                      className="h-full origin-left rounded-full"
-                      style={{
-                        backgroundColor: active.accent,
-                        transform: "scaleX(0)",
-                      }}
-                    />
-                  )}
-                  {index < activeIndex && (
-                    <div
-                      className="h-full rounded-full opacity-40"
-                      style={{ backgroundColor: active.accent }}
-                    />
-                  )}
-                </div>
+                  onClick={() => goTo(index)}
+                  aria-label={`Go to testimonial from ${t.name}`}
+                  className="group relative h-1.5 rounded-full bg-[#14213D]/10 transition-all duration-500"
+                  style={{
+                    width: index === activeIndex ? "28px" : "8px",
+                    backgroundColor:
+                      index === activeIndex ? active.accent : undefined,
+                  }}
+                />
               ))}
+            </div>
+          </div>
+
+          {/* Right: 3D coverflow stage */}
+          <div
+            ref={stageRef}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+            className="relative h-[480px] w-full sm:h-[440px] lg:h-[460px]"
+            style={{ perspective: "1600px" }}
+          >
+            <div
+              className="relative h-full w-full"
+              style={{ transformStyle: "preserve-3d" }}
+            >
+              {testimonials.map((t, i) => {
+                const d = circularDelta(i, activeIndex, len);
+                const abs = Math.abs(d);
+                if (abs > 2) return null;
+
+                const isActive = d === 0;
+                const translateX = d * 62; // % of card width
+                const rotateY = d * -32; // deg
+                const scale = isActive ? 1 : abs === 1 ? 0.82 : 0.66;
+                const opacity = isActive ? 1 : abs === 1 ? 0.55 : 0.22;
+                const zIndex = 30 - abs * 10;
+                const blur = isActive ? 0 : abs === 1 ? 1 : 2.5;
+
+                return (
+                  <div
+                    key={t.id}
+                    onClick={() => !isActive && goTo(i)}
+                    className={`absolute left-1/2 top-1/2 w-[85%] max-w-md select-none rounded-[28px] transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                      isActive ? "cursor-default" : "cursor-pointer"
+                    } ${abs === 2 ? "hidden md:block" : ""}`}
+                    style={{
+                      transform: `translate(-50%, -50%) translateX(${translateX}%) rotateY(${rotateY}deg) scale(${scale})`,
+                      zIndex,
+                      opacity,
+                      filter: `blur(${blur}px)`,
+                      transformStyle: "preserve-3d",
+                    }}
+                  >
+                    <div
+                      className="relative flex h-full min-h-[380px] flex-col justify-between overflow-hidden rounded-[28px] p-7 sm:p-8"
+                      style={{
+                        background:
+                          "linear-gradient(155deg, #1a4d7a 0%, #113E6E 55%, #0c2d52 100%)",
+                        boxShadow: isActive
+                          ? `0 30px 60px -20px rgba(17,62,110,0.45), 0 0 0 1px ${t.accent}30`
+                          : "0 20px 40px -20px rgba(17,62,110,0.3)",
+                      }}
+                    >
+                      {/* glow */}
+                      <div
+                        className="pointer-events-none absolute -right-16 -top-16 h-52 w-52 rounded-full blur-3xl"
+                        style={{ backgroundColor: `${t.accent}26` }}
+                      />
+                      <div
+                        className="pointer-events-none absolute inset-0 opacity-[0.05]"
+                        style={{
+                          backgroundImage: `radial-gradient(circle at 1px 1px, #FFFFFF 1px, transparent 0)`,
+                          backgroundSize: "28px 28px",
+                        }}
+                      />
+
+                      <div className="relative z-10">
+                        <div className="mb-6 flex items-start justify-between">
+                          <Quote
+                            className="h-9 w-9"
+                            style={{ color: `${t.accent}66` }}
+                          />
+                          <div className="flex items-center gap-0.5">
+                            {[...Array(t.rating)].map((_, i2) => (
+                              <Star
+                                key={i2}
+                                className="h-3.5 w-3.5"
+                                style={{ fill: t.accent, color: t.accent }}
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        <p
+                          className={`font-serif leading-relaxed text-[#F5F3EE] ${
+                            isActive
+                              ? "text-base sm:text-lg"
+                              : "text-sm sm:text-base"
+                          }`}
+                        >
+                          {isActive ? t.content : `${t.content.slice(0, 120)}…`}
+                        </p>
+                      </div>
+
+                      <div className="relative z-10 mt-6 flex items-center gap-3">
+                        <span
+                          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl font-serif text-sm font-bold"
+                          style={{
+                            backgroundColor: `${t.accent}25`,
+                            color: t.accent,
+                          }}
+                        >
+                          {initials(t.name)}
+                        </span>
+                        <div className="min-w-0">
+                          <h4 className="truncate font-serif text-sm font-semibold text-white sm:text-base">
+                            {t.name}
+                          </h4>
+                          <p className="truncate text-xs text-white/50">
+                            {t.role} ·{" "}
+                            <span style={{ color: t.accent }}>{t.company}</span>
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Autoplay progress bar — only on the active card */}
+                      {isActive && (
+                        <div className="relative z-10 mt-6 h-[3px] w-full overflow-hidden rounded-full bg-white/10">
+                          <div
+                            ref={progressRef}
+                            className="h-full origin-left rounded-full"
+                            style={{
+                              backgroundColor: t.accent,
+                              transform: "scaleX(0)",
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

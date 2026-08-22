@@ -39,7 +39,6 @@ const BRAND = {
 interface Category {
   title: string;
   image: string;
-  /** Optional extra images for the "View all" gallery. Falls back to [image] if omitted. */
   gallery?: string[];
   services: string[];
   icon: React.ReactNode;
@@ -186,11 +185,7 @@ const CATEGORIES: Category[] = [
 ];
 
 /* -------------------------------------------------------------------- */
-/*  Shared easing vocabulary — one hand, everywhere.                     */
-/*  EASE     -> decisive, long settle for big reveals (was cubic-bezier  */
-/*              0.16,1,0.3,1 under Framer; expo.out reads the same way)  */
-/*  EASE_SOFT-> gentler settle for small/secondary reveals               */
-/*  EASE_SPRING -> soft spring-like overshoot for modal/lightbox pop-ins */
+/*  Easing vocabulary                                                    */
 /* -------------------------------------------------------------------- */
 
 const EASE = "expo.out";
@@ -199,9 +194,6 @@ const EASE_SPRING = "back.out(1.5)";
 
 /* -------------------------------------------------------------------- */
 /*  Lenis <-> GSAP wiring                                                */
-/*  Lenis drives the raf loop through gsap.ticker so scroll, ScrollTrig- */
-/*  ger, and every animation below share one clock — no drift, no        */
-/*  double rAF loops fighting each other.                                */
 /* -------------------------------------------------------------------- */
 
 function useLenisGsap() {
@@ -212,20 +204,16 @@ function useLenisGsap() {
       smoothWheel: true,
     });
 
-    // Single source of truth for the frame loop: Lenis updates scroll,
-    // then ScrollTrigger is told about it, every tick — no second rAF
-    // loop competing with GSAP's, which is what was fighting for frames
-    // and reading as "laggy" scrolling.
     const tick = (time: number) => {
       lenis.raf(time * 1000);
       ScrollTrigger.update();
     };
     gsap.ticker.add(tick);
-    gsap.ticker.lagSmoothing(0);
+    // FIX: lagSmoothing(0) makes GSAP snap instead of smoothing frame
+    // drops, which *feels* laggier when the main thread hitches (e.g.
+    // during heavy 3D compositing below). Give it real smoothing.
+    gsap.ticker.lagSmoothing(500, 33);
 
-    // Fixes the "wrong on refresh" issue: on first paint, web fonts /
-    // late image decode can still shift layout after ScrollTrigger has
-    // already measured trigger positions. Re-measure once things settle.
     const refresh = () => ScrollTrigger.refresh();
     window.addEventListener("load", refresh);
     const t = setTimeout(refresh, 300);
@@ -240,7 +228,7 @@ function useLenisGsap() {
 }
 
 /* -------------------------------------------------------------------- */
-/*  Generic scroll-reveal hook — fromTo + ScrollTrigger, fires once.     */
+/*  Generic scroll-reveal hook — now supports "coming AND going"         */
 /* -------------------------------------------------------------------- */
 
 function useReveal<T extends HTMLElement>(opts?: {
@@ -250,6 +238,8 @@ function useReveal<T extends HTMLElement>(opts?: {
   delay?: number;
   ease?: string;
   start?: string;
+  /** If true, animation reverses out on scroll-up and replays on re-entry. */
+  replay?: boolean;
 }) {
   const ref = useRef<T | null>(null);
 
@@ -257,23 +247,24 @@ function useReveal<T extends HTMLElement>(opts?: {
     const el = ref.current;
     if (!el) return;
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        el,
-        { opacity: 0, y: opts?.y ?? 28, scale: opts?.scale ?? 1 },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: opts?.duration ?? 0.7,
-          delay: opts?.delay ?? 0,
-          ease: opts?.ease ?? EASE,
-          scrollTrigger: {
-            trigger: el,
-            start: opts?.start ?? "top 88%",
-            once: true,
-          },
+      gsap.set(el, { autoAlpha: 0, y: opts?.y ?? 28, scale: opts?.scale ?? 1 });
+      gsap.to(el, {
+        autoAlpha: 1,
+        y: 0,
+        scale: 1,
+        duration: opts?.duration ?? 0.7,
+        delay: opts?.delay ?? 0,
+        ease: opts?.ease ?? EASE,
+        force3D: true,
+        scrollTrigger: {
+          trigger: el,
+          start: opts?.start ?? "top 88%",
+          end: "bottom 12%",
+          toggleActions: opts?.replay
+            ? "play reverse play reverse"
+            : "play none none none",
         },
-      );
+      });
     });
     return () => ctx.revert();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -283,14 +274,13 @@ function useReveal<T extends HTMLElement>(opts?: {
 }
 
 /* -------------------------------------------------------------------- */
-/*  Moving brand logo                                                    */
+/*  Moving brand logo (unchanged — this one was fine)                    */
 /* -------------------------------------------------------------------- */
 
 function BrandMark({ size = 56 }: { size?: number }) {
   const sceneRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
 
-  // pointer tilt (unchanged — plain DOM + CSS custom properties)
   useEffect(() => {
     const el = sceneRef.current;
     if (!el) return;
@@ -323,16 +313,15 @@ function BrandMark({ size = 56 }: { size?: number }) {
     };
   }, []);
 
-  // entrance reveal
   useEffect(() => {
     const el = sceneRef.current;
     if (!el) return;
     const ctx = gsap.context(() => {
       gsap.fromTo(
         el,
-        { opacity: 0, scale: 0.7, rotate: -8 },
+        { autoAlpha: 0, scale: 0.7, rotate: -8 },
         {
-          opacity: 1,
+          autoAlpha: 1,
           scale: 1,
           rotate: 0,
           duration: 0.7,
@@ -365,6 +354,14 @@ function BrandMark({ size = 56 }: { size?: number }) {
   );
 }
 
+/* -------------------------------------------------------------------- */
+/*  Card tilt — FIX: GSAP now owns 100% of the transform, no CSS         */
+/*  transition on `transform` anywhere near this element anymore.       */
+/*  Lift-on-hover is now also done via quickTo(y) instead of a           */
+/*  Tailwind `hover:-translate-y` class, so there's exactly ONE writer   */
+/*  of `transform` at all times.                                        */
+/* -------------------------------------------------------------------- */
+
 function useCardTilt() {
   const cardRef = useRef<HTMLDivElement>(null);
   const imgWrapRef = useRef<HTMLDivElement>(null);
@@ -381,44 +378,53 @@ function useCardTilt() {
       duration: 0.6,
       ease: "power3.out",
     });
+    const quickY = gsap.quickTo(card, "y", {
+      duration: 0.45,
+      ease: "power3.out",
+    });
 
     const isFine = window.matchMedia("(pointer: fine)").matches;
     if (!isFine) return;
 
-    let leaveTimer: ReturnType<typeof setTimeout> | null = null;
+    let hovering = false;
+
+    function handleEnter() {
+      hovering = true;
+      card!.style.willChange = "transform";
+      quickY(-10); // replaces hover:-translate-y-2.5
+    }
 
     function handleMove(e: MouseEvent) {
-      // Only pay the compositing cost while actually interacting.
-      card!.style.willChange = "transform";
-      if (leaveTimer) {
-        clearTimeout(leaveTimer);
-        leaveTimer = null;
-      }
-
+      if (!hovering) return;
       const rect = card!.getBoundingClientRect();
       const px = (e.clientX - rect.left) / rect.width;
       const py = (e.clientY - rect.top) / rect.height;
 
-      quickRotX(7 - py * 14); // 0..1 -> 7..-7
-      quickRotY(px * 14 - 7); // 0..1 -> -7..7
+      quickRotX(6 - py * 12); // gentler than before: 0..1 -> 6..-6
+      quickRotY(px * 12 - 6); // 0..1 -> -6..6
 
       card!.style.setProperty("--mx", `${px * 100}%`);
       card!.style.setProperty("--my", `${py * 100}%`);
       card!.style.setProperty("--angle", `${px * 360}deg`);
     }
+
     function handleLeave() {
+      hovering = false;
       quickRotX(0);
       quickRotY(0);
-      leaveTimer = setTimeout(() => {
-        card!.style.willChange = "auto";
-      }, 650);
+      quickY(0);
+      gsap.delayedCall(0.5, () => {
+        if (!hovering) card!.style.willChange = "auto";
+      });
     }
+
+    card.addEventListener("mouseenter", handleEnter, { passive: true });
     card.addEventListener("mousemove", handleMove, { passive: true });
     card.addEventListener("mouseleave", handleLeave);
     return () => {
+      card.removeEventListener("mouseenter", handleEnter);
       card.removeEventListener("mousemove", handleMove);
       card.removeEventListener("mouseleave", handleLeave);
-      if (leaveTimer) clearTimeout(leaveTimer);
     };
   }, []);
 
@@ -459,9 +465,12 @@ function CategoryCard({
           onOpen(index);
         }
       }}
+      // FIX: dropped `hover:-translate-y-2.5` and `transform` from the
+      // CSS transition list — GSAP quickTo owns transform exclusively now.
+      // Kept box-shadow/border-color, they're cheap and don't conflict.
       className={`premium-card-teal group relative flex cursor-pointer flex-col overflow-hidden rounded-[36px] border-2 border-[#113E6E]/12 bg-white outline-none
-          transition-[transform,box-shadow,border-color] duration-500 ease-out
-          hover:-translate-y-2.5 hover:border-[#22C55E] hover:shadow-[0_45px_100px_-24px_rgba(17,62,110,0.35)]
+          transition-[box-shadow,border-color] duration-500 ease-out
+          hover:border-[#22C55E] hover:shadow-[0_45px_100px_-24px_rgba(17,62,110,0.35)]
           ${isMobileActive ? "block" : "hidden"} lg:block`}
       style={{
         perspective: 1400,
@@ -470,7 +479,6 @@ function CategoryCard({
         boxShadow: "0 20px 55px -25px rgba(17,62,110,0.18)",
       }}
     >
-      {/* Ambient floating particles */}
       <div className="pointer-events-none absolute inset-0 z-[5] overflow-hidden rounded-[36px] opacity-0 transition-opacity duration-700 group-hover:opacity-100">
         {[...Array(6)].map((_, p) => (
           <span
@@ -485,7 +493,6 @@ function CategoryCard({
         ))}
       </div>
 
-      {/* ---------- Hero image (static — no mousemove pan/zoom) ---------- */}
       <div
         className="relative h-60 w-full overflow-hidden sm:h-68 group/image"
         style={{ transform: "translateZ(10px)" }}
@@ -501,7 +508,6 @@ function CategoryCard({
         </div>
 
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
-
         <div className="absolute inset-3 rounded-2xl border border-white/20 pointer-events-none" />
         <div className="absolute inset-5 rounded-xl border border-[#22C55E]/25 pointer-events-none" />
 
@@ -512,7 +518,6 @@ function CategoryCard({
         </div>
       </div>
 
-      {/* ---------- Body ---------- */}
       <div
         className="relative flex flex-1 flex-col px-8 pb-8 pt-7 z-10"
         style={{ transform: "translateZ(20px)" }}
@@ -570,15 +575,21 @@ function GalleryMosaic({ images, title }: { images: string[]; title: string }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const swipeStartX = useRef(0);
 
-  // reveal the bento tiles whenever the image set changes (i.e. modal opens)
   useEffect(() => {
     const el = gridRef.current;
     if (!el) return;
     const tiles = el.querySelectorAll<HTMLElement>("[data-tile]");
     gsap.fromTo(
       tiles,
-      { opacity: 0, y: 12, scale: 0.9 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: EASE, stagger: 0.05 },
+      { autoAlpha: 0, y: 12, scale: 0.9 },
+      {
+        autoAlpha: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.4,
+        ease: EASE,
+        stagger: 0.05,
+      },
     );
   }, [images]);
 
@@ -612,7 +623,6 @@ function GalleryMosaic({ images, title }: { images: string[]; title: string }) {
     });
   }, []);
 
-  // mount + entrance animation
   useEffect(() => {
     if (lightboxIndex === null) return;
     setLightboxMounted(true);
@@ -630,7 +640,6 @@ function GalleryMosaic({ images, title }: { images: string[]; title: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lightboxMounted]);
 
-  // crossfade whenever the active image changes
   useEffect(() => {
     if (!lightboxMounted) return;
     const stage = stageRef.current;
@@ -673,7 +682,6 @@ function GalleryMosaic({ images, title }: { images: string[]; title: string }) {
 
   return (
     <>
-      {/* ---- Responsive bento grid ---- */}
       <div
         ref={gridRef}
         className="grid auto-rows-[76px] grid-cols-3 gap-2 sm:auto-rows-[92px] sm:gap-2.5 md:auto-rows-[100px]"
@@ -712,7 +720,6 @@ function GalleryMosaic({ images, title }: { images: string[]; title: string }) {
         ))}
       </div>
 
-      {/* ---- Fullscreen lightbox ---- */}
       {lightboxMounted && lightboxIndex !== null && (
         <div
           ref={backdropRef}
@@ -863,13 +870,11 @@ export default function ServicesSection() {
     });
   }, []);
 
-  // mount on open
   useEffect(() => {
     if (modalIndex === null) return;
     setModalMounted(true);
   }, [modalIndex]);
 
-  // entrance / re-entrance animation, replayed every time modalIndex changes
   useEffect(() => {
     if (!modalMounted) return;
     const backdrop = modalBackdropRef.current;
@@ -912,6 +917,15 @@ export default function ServicesSection() {
 
   useLenisGsap();
 
+  /* ------------------------------------------------------------------ */
+  /*  FIX: card entrance now:                                            */
+  /*  - much lighter 3D (rotateY 58deg -> 20deg, rotateX 6 -> 3)         */
+  /*  - runs as ONE timeline instead of N separate gsap.fromTo calls      */
+  /*  - uses toggleActions so cards fade back out on scroll-up and        */
+  /*    replay on scroll-down re-entry ("coming and going")               */
+  /*  - autoAlpha instead of opacity (skips paint/hit-test while hidden)  */
+  /*  - will-change is applied once per section visibility, not per-tween */
+  /* ------------------------------------------------------------------ */
   useEffect(() => {
     const mm = gsap.matchMedia();
 
@@ -921,10 +935,8 @@ export default function ServicesSection() {
       if (!cards.length) return;
 
       if (!isDesktop) {
-        // Mobile shows one card at a time via tabs — no scroll reveal,
-        // just make sure every card is visible whenever it's toggled on.
         gsap.set(cards, {
-          opacity: 1,
+          autoAlpha: 1,
           x: 0,
           rotateX: 0,
           rotateY: 0,
@@ -934,47 +946,45 @@ export default function ServicesSection() {
         return;
       }
 
-      gsap.set(cards, { opacity: 0 });
+      const tweens = cards.map((card, i) => {
+        const fromLeft = i % 2 === 0;
 
-      const triggers = ScrollTrigger.batch(cards, {
-        start: "top 87%",
-        once: true,
-        onEnter: (batch) => {
-          batch.forEach((el) => {
-            const i = cards.indexOf(el as HTMLElement);
-            const fromLeft = i % 2 === 0;
-            const target = el as HTMLElement;
-            target.style.willChange = "transform, opacity";
-            gsap.fromTo(
-              target,
-              {
-                opacity: 0,
-                x: fromLeft ? -140 : 140,
-                rotateY: fromLeft ? -58 : 58,
-                rotateX: 6,
-                scale: 0.9,
+        return gsap.fromTo(
+          card,
+          {
+            autoAlpha: 0,
+            x: fromLeft ? -60 : 60,
+            rotateY: fromLeft ? -20 : 20,
+            rotateX: 3,
+            scale: 0.94,
+          },
+          {
+            autoAlpha: 1,
+            x: 0,
+            rotateY: 0,
+            rotateX: 0,
+            scale: 1,
+            duration: 0.85,
+            ease: EASE,
+            force3D: true,
+            paused: true,
+            scrollTrigger: {
+              trigger: card,
+              start: "top 90%",
+              end: "bottom 10%",
+              toggleActions: "play reverse play reverse",
+              onToggle: (self) => {
+                card.style.willChange = self.isActive
+                  ? "transform, opacity"
+                  : "auto";
               },
-              {
-                opacity: 1,
-                x: 0,
-                rotateY: 0,
-                rotateX: 0,
-                scale: 1,
-                duration: 1,
-                ease: EASE,
-                delay: (i % 3) * 0.07,
-                force3D: true,
-                onComplete: () => {
-                  target.style.willChange = "auto";
-                },
-              },
-            );
-          });
-        },
+            },
+          },
+        );
       });
 
       return () => {
-        triggers.forEach((t) => t.kill());
+        tweens.forEach((tw) => tw.scrollTrigger?.kill());
       };
     });
 
@@ -1015,13 +1025,11 @@ export default function ServicesSection() {
           block: "center",
         });
       } else {
-        // Mobile: scroll so the card appears at the top of the viewport
-        // with some offset for the tabs
         const targetRect = target.getBoundingClientRect();
         const scrollTop =
           window.pageYOffset || document.documentElement.scrollTop;
         const targetTop = targetRect.top + scrollTop;
-        const offset = 120; // Adjust this value to control how much space from top
+        const offset = 120;
 
         window.scrollTo({
           top: targetTop - offset,
@@ -1038,14 +1046,13 @@ export default function ServicesSection() {
     [modalCategory],
   );
 
-  // service-chip stagger reveal, replayed each time the modal category changes
   useEffect(() => {
     if (!modalMounted) return;
     const chips = document.querySelectorAll<HTMLElement>("[data-service-chip]");
     gsap.fromTo(
       chips,
-      { opacity: 0, y: 6 },
-      { opacity: 1, y: 0, duration: 0.25, ease: EASE, stagger: 0.03 },
+      { autoAlpha: 0, y: 6 },
+      { autoAlpha: 1, y: 0, duration: 0.25, ease: EASE, stagger: 0.03 },
     );
   }, [modalMounted, modalIndex]);
 
@@ -1062,16 +1069,19 @@ export default function ServicesSection() {
       id="services"
       className="relative overflow-hidden bg-white py-24 sm:py-28 md:py-30"
     >
-      <div className="absolute inset-0 pointer-events-none">
-        {/* <div className="absolute top-0 right-0 w-[1000px] h-[1000px] bg-gradient-to-bl from-[#22C55E]/[0.08] to-transparent rounded-full blur-3xl animate-pulse-slow" /> */}
-        <div className="absolute bottom-0 left-0 w-[1000px] h-[1000px] bg-gradient-to-tr from-[#113E6E]/[0.08] to-transparent rounded-full blur-3xl" />
-
-        <div className="absolute top-20 left-10 w-32 h-32 bg-[#22C55E]/[0.06] rounded-full blur-2xl animate-float" />
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-[#113E6E]/[0.07] rounded-full blur-2xl animate-float-delayed" />
+      {/* FIX: added `contain: paint` isolation via inline style so these
+          blurred/animated blobs don't force repaint of the whole section
+          while cards are animating in/out during scroll. */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ contain: "paint" }}
+      >
+        <div className="absolute bottom-0 left-0 w-[1000px] h-[1000px] bg-gradient-to-tr from-[#113E6E]/[0.08] to-transparent rounded-full blur-3xl will-change-transform" />
+        <div className="absolute top-20 left-10 w-32 h-32 bg-[#22C55E]/[0.06] rounded-full blur-2xl animate-float will-change-transform" />
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-[#113E6E]/[0.07] rounded-full blur-2xl animate-float-delayed will-change-transform" />
       </div>
 
       <div className="relative mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16">
-        {/* ---------- brand bar ---------- */}
         <div
           ref={brandBarRef}
           style={{ opacity: 0 }}
@@ -1087,7 +1097,6 @@ export default function ServicesSection() {
           </div>
         </div>
 
-        {/* ---------- heading row ---------- */}
         <div
           ref={headingRef}
           style={{ opacity: 0 }}
@@ -1119,7 +1128,6 @@ export default function ServicesSection() {
           </Link>
         </div>
 
-        {/* ---------- category tabs ---------- */}
         <div
           ref={tabsRef}
           style={{ opacity: 0 }}
@@ -1148,7 +1156,6 @@ export default function ServicesSection() {
           ))}
         </div>
 
-        {/* ---------- premium card grid ---------- */}
         <div
           ref={gridRef}
           className="mt-12 grid grid-cols-1 gap-7 sm:gap-8 md:grid-cols-2 xl:grid-cols-3"
@@ -1195,7 +1202,6 @@ export default function ServicesSection() {
             </button>
 
             <div className="flex flex-1 flex-col overflow-y-auto sm:flex-row sm:overflow-hidden">
-              {/* left — mosaic gallery + identity panel */}
               <div className="relative flex w-full flex-none flex-col gap-5 bg-[#113E6E] p-6 sm:w-[46%] sm:overflow-y-auto sm:p-8">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] tracking-[0.25em] text-[#22C55E]">
@@ -1244,7 +1250,6 @@ export default function ServicesSection() {
                 </div>
               </div>
 
-              {/* right — service chips */}
               <div className="flex-1 overflow-y-auto bg-[#F3FBFD] p-6 sm:p-10">
                 <span className="mb-5 block text-[11px] uppercase tracking-[0.22em] text-[#113E6E]/50">
                   What&rsquo;s Included

@@ -4,7 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
+import { motion } from "framer-motion";
 import { FiMenu, FiX, FiChevronDown, FiArrowUpRight } from "react-icons/fi";
+import Button from "./Button";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -150,14 +152,13 @@ export default function Navbar() {
       return;
     }
 
-    // 🔧 SLOWED DOWN CLOSE ANIMATION — was 0.4s / 0.35s with "power3.in" / "power2.in"
     const tl = gsap.timeline({
       onComplete: () => setDrawerMounted(false),
     });
     tl.to(drawer, { x: "100%", duration: 0.9, ease: "power2.inOut" }, 0).to(
       overlay,
       { opacity: 0, duration: 0.75, ease: "power2.inOut" },
-      0.05, // overlay lingers slightly behind the drawer for a softer feel
+      0.05,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mobileOpen, mounted]);
@@ -172,12 +173,11 @@ export default function Navbar() {
     gsap.set(drawer, { x: "100%" });
     gsap.set(overlay, { opacity: 0 });
 
-    // 🔧 SLOWED DOWN OPEN ANIMATION — was 0.3s / 0.45s with "power2.out" / "power3.out"
     const tl = gsap.timeline();
     tl.to(overlay, { opacity: 1, duration: 0.7, ease: "power2.out" }, 0).to(
       drawer,
       { x: "0%", duration: 0.9, ease: "power3.out" },
-      0.05, // drawer starts a beat after overlay fades in, feels less abrupt
+      0.05,
     );
   }, [drawerMounted, mobileOpen]);
 
@@ -293,7 +293,7 @@ export default function Navbar() {
             <Link href="/" className="shrink-0 z-10">
               <Image
                 src="/logo.png"
-                width={150}
+                width={130}
                 height={42}
                 alt="Company Logo"
                 priority
@@ -322,7 +322,12 @@ export default function Navbar() {
                     }}
                     onMouseEnter={() => handleEnter("services")}
                     onMouseLeave={handleLeave}
-                    className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[700px] rounded-2xl border border-white/20 bg-white/80 backdrop-blur-xl shadow-2xl shadow-black/30 p-6 origin-top"
+                    data-lenis-prevent
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[700px] rounded-2xl border border-white/20 bg-white/80 backdrop-blur-xl shadow-2xl shadow-black/30 p-6 origin-top max-h-[75vh] overflow-y-auto"
+                    style={{
+                      touchAction: "pan-y",
+                      overscrollBehavior: "contain",
+                    }}
                   >
                     <p className="text-[10px] font-bold uppercase tracking-widest text-black/50 mb-4 px-1">
                       What We Do
@@ -379,7 +384,12 @@ export default function Navbar() {
                     }}
                     onMouseEnter={() => handleEnter("industries")}
                     onMouseLeave={handleLeave}
-                    className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[700px] rounded-2xl border border-white/20 bg-white/80 backdrop-blur-xl shadow-2xl shadow-black/30 p-6 origin-top"
+                    data-lenis-prevent
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[700px] rounded-2xl border border-white/20 bg-white/80 backdrop-blur-xl shadow-2xl shadow-black/30 p-6 origin-top max-h-[75vh] overflow-y-auto"
+                    style={{
+                      touchAction: "pan-y",
+                      overscrollBehavior: "contain",
+                    }}
                   >
                     <p className="text-[10px] font-bold uppercase tracking-widest text-black/50 mb-4 px-1">
                       Industries We Serve
@@ -436,7 +446,12 @@ export default function Navbar() {
                     }}
                     onMouseEnter={() => handleEnter("resources")}
                     onMouseLeave={handleLeave}
-                    className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[420px] rounded-2xl border border-white/20 bg-white/80 backdrop-blur-xl shadow-2xl shadow-black/30 p-5 origin-top"
+                    data-lenis-prevent
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[420px] rounded-2xl border border-white/20 bg-white/80 backdrop-blur-xl shadow-2xl shadow-black/30 p-5 origin-top max-h-[75vh] overflow-y-auto"
+                    style={{
+                      touchAction: "pan-y",
+                      overscrollBehavior: "contain",
+                    }}
                   >
                     <p className="text-[10px] font-bold uppercase tracking-widest text-black/50 mb-4 px-1">
                       Explore
@@ -468,30 +483,26 @@ export default function Navbar() {
               </div>
             </div>
 
-            {/* ── CTA ── */}
-            <div className="hidden lg:block shrink-0">
-              <Link
-                href="/contact"
-                className="group relative inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold overflow-hidden bg-[#05c954] text-white shadow-[0_12px_35px_rgba(5,201,84,.35)] hover:shadow-[0_18px_45px_rgba(5,201,84,.55)] hover:-translate-y-1 active:scale-95 transition-all duration-500"
-              >
-                <span className="relative z-10">Contact Us</span>
-                <FiArrowUpRight
-                  size={15}
-                  className="relative z-10 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-150"
-                />
-                <span className="absolute inset-0 -skew-x-12 -translate-x-full group-hover:translate-x-[200%] transition-transform duration-500 bg-white/20 pointer-events-none" />
-              </Link>
-            </div>
+            {/* ── CTA + Hamburger cluster ──
+                 Desktop: shows your existing <Button /> component.
+                 Mobile/Tablet: NO contact button here — only the hamburger.
+                 Contact Us lives inside the sidebar drawer only. ── */}
+            <div className="flex items-center gap-3 shrink-0">
+              {/* Desktop CTA (your original Button component) */}
+              <div className="hidden lg:block">
+                <Button />
+              </div>
 
-            {/* ── Hamburger (mobile + tablet) ── */}
-            <button
-              onClick={() => setMobileOpen(true)}
-              className="lg:hidden relative flex items-center justify-center w-14 h-14 rounded-full bg-[#05c954] text-white shadow-[0_0_30px_rgba(5,201,84,0.35)] hover:bg-[#04b44b] hover:shadow-[0_0_45px_rgba(5,201,84,0.55)] hover:scale-110 transition-all duration-300 active:scale-95"
-              aria-label="Open menu"
-              aria-expanded={mobileOpen}
-            >
-              <FiMenu size={24} />
-            </button>
+              {/* ── Hamburger (mobile + tablet only) ── */}
+              <button
+                onClick={() => setMobileOpen(true)}
+                className="lg:hidden relative flex items-center justify-center w-14 h-14  text-black  hover:scale-110 transition-all duration-300 active:scale-95"
+                aria-label="Open menu"
+                aria-expanded={mobileOpen}
+              >
+                <FiMenu size={24} />
+              </button>
+            </div>
           </div>
 
           {/* ── Progress bar (fades in on scroll) ── */}
@@ -550,7 +561,12 @@ export default function Navbar() {
             {/* Drawer scrollable content */}
             <div
               className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 flex flex-col gap-1 text-sm font-medium text-black"
-              style={{ WebkitOverflowScrolling: "touch" }}
+              style={{
+                WebkitOverflowScrolling: "touch",
+                touchAction: "pan-y",
+                overscrollBehavior: "contain",
+              }}
+              data-lenis-prevent
             >
               <MobileLink href="/" onClick={closeDrawer}>
                 Home

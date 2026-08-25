@@ -6,7 +6,8 @@ import Link from "next/link";
 import { gsap } from "gsap";
 import { motion } from "framer-motion";
 import { FiMenu, FiX, FiChevronDown, FiArrowUpRight } from "react-icons/fi";
-import Button from "./Button";
+import GooeyButton from "../Aboutus/bthr";
+import { FaBarsProgress } from "react-icons/fa6";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -483,14 +484,12 @@ export default function Navbar() {
               </div>
             </div>
 
-            {/* ── CTA + Hamburger cluster ──
-                 Desktop: shows your existing <Button /> component.
-                 Mobile/Tablet: NO contact button here — only the hamburger.
-                 Contact Us lives inside the sidebar drawer only. ── */}
             <div className="flex items-center gap-3 shrink-0">
               {/* Desktop CTA (your original Button component) */}
               <div className="hidden lg:block">
-                <Button />
+                <Link href="/contact">
+                  <GooeyButton />
+                </Link>
               </div>
 
               {/* ── Hamburger (mobile + tablet only) ── */}
@@ -500,7 +499,7 @@ export default function Navbar() {
                 aria-label="Open menu"
                 aria-expanded={mobileOpen}
               >
-                <FiMenu size={24} />
+                <FaBarsProgress size={25} />
               </button>
             </div>
           </div>
@@ -660,9 +659,9 @@ export default function Navbar() {
               <Link
                 href="/contact"
                 onClick={closeDrawer}
-                className="flex items-center justify-center gap-2 rounded-xl bg-[#05c954] py-3.5 text-white font-semibold shadow-lg shadow-green-500/20 hover:opacity-90 transition-opacity"
+                className="flex items-center justify-center gap-2  py-3.5 text-white font-semibold shadow-lg shadow-green-500/20 hover:opacity-90 transition-opacity"
               >
-                Contact Us <FiArrowUpRight size={15} />
+                <GooeyButton />
               </Link>
             </div>
           </div>

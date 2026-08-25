@@ -332,6 +332,7 @@ export default function IndustriesSection() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [phase, setPhase] = useState<"closed" | "open" | "closing">("closed");
   const reducedRef = useRef(false);
+  const isTouchDeviceRef = useRef(false);
   const closeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* ---------------------------------------------------------------- */
@@ -341,6 +342,13 @@ export default function IndustriesSection() {
     reducedRef.current = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
+
+    // 🔧 MOBILE FIX #1: Detect touch device
+    isTouchDeviceRef.current =
+      window.matchMedia("(pointer: coarse)").matches ||
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      );
 
     const ctx = gsap.context(() => {
       if (headingRef.current) {
@@ -378,9 +386,11 @@ export default function IndustriesSection() {
             transformOrigin: "center bottom",
           });
 
+          // 🔧 MOBILE FIX #2: Improve ScrollTrigger for mobile
           ScrollTrigger.batch(tiles, {
             start: "top 88%",
             once: true,
+            interval: 0.1, // Add interval for better batching
             onEnter: (batch) =>
               gsap.to(batch, {
                 opacity: 1,
@@ -396,7 +406,8 @@ export default function IndustriesSection() {
         }
       }
 
-      if (gridRef.current && !reducedRef.current) {
+      // 🔧 MOBILE FIX #3: Disable 3D tilt effects on touch devices
+      if (gridRef.current && !reducedRef.current && !isTouchDeviceRef.current) {
         const cardTiles =
           gridRef.current.querySelectorAll<HTMLElement>("button[data-tile]");
         const cleanups: Array<() => void> = [];
@@ -443,8 +454,14 @@ export default function IndustriesSection() {
       }
     }, sectionRef);
 
+    // 🔧 MOBILE FIX #4: Disable CTA button tracking on touch devices
     const ctx2 = gsap.context(() => {
-      if (ctaBtnRef.current && ctaWrapRef.current && !reducedRef.current) {
+      if (
+        ctaBtnRef.current &&
+        ctaWrapRef.current &&
+        !reducedRef.current &&
+        !isTouchDeviceRef.current
+      ) {
         const btn = ctaBtnRef.current;
         const wrap = ctaWrapRef.current;
         const xTo = gsap.quickTo(btn, "x", {
@@ -733,6 +750,14 @@ export default function IndustriesSection() {
           aria-modal="true"
           aria-label={`${active.name} sub-sectors`}
           className="fixed inset-0 z-[2000] flex items-center justify-center p-4 sm:p-8"
+          // 🔧 MOBILE FIX #5: Prevent drag/scroll on backdrop
+          onTouchMove={(e) => {
+            // Allow scroll inside modal only
+            const modalContent = modalContentRef.current;
+            if (modalContent && !modalContent.contains(e.target as Node)) {
+              e.preventDefault();
+            }
+          }}
         >
           {/* backdrop */}
           <div
@@ -740,7 +765,13 @@ export default function IndustriesSection() {
             className={`absolute inset-0 bg-[#14110F] transition-opacity duration-300 ${
               phase === "open" ? "opacity-70" : "opacity-0"
             }`}
-            style={{ backdropFilter: "blur(6px)" }}
+            style={{
+              backdropFilter: "blur(6px)",
+              // 🔧 MOBILE FIX #6: Ensure backdrop doesn't capture pointer events during scroll
+              pointerEvents: phase === "open" ? "auto" : "none",
+            }}
+            // 🔧 Prevent drag on backdrop
+            onTouchMove={(e) => e.preventDefault()}
           />
 
           {/* panel */}
@@ -750,7 +781,11 @@ export default function IndustriesSection() {
                 ? "translate-y-0 scale-100 opacity-100"
                 : "translate-y-4 scale-[0.97] opacity-0"
             }`}
-            style={{ maxHeight: "min(640px, 88vh)" }}
+            style={{
+              maxHeight: "min(640px, 88vh)",
+              // 🔧 Ensure touch-action is set correctly for scrolling
+              touchAction: "pan-y",
+            }}
           >
             {/* close */}
             <button
@@ -796,7 +831,11 @@ export default function IndustriesSection() {
             </div>
 
             {/* right — sub-sector list */}
-            <div className="flex-1 min-h-0 overflow-y-auto p-8 sm:p-10">
+            <div
+              className="flex-1 min-h-0 overflow-y-auto p-8 sm:p-10"
+              // 🔧 Ensure proper touch scrolling
+              style={{ touchAction: "pan-y" }}
+            >
               <div ref={modalContentRef}>
                 <h3 className="text-2xl leading-tight text-[#14110F] sm:text-2xl">
                   {active.name}

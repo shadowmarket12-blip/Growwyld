@@ -1,317 +1,534 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import Lenis from "@studio-freight/lenis";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Image from "next/image";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import {
+  Code2,
+  Smartphone,
+  Cloud,
+  Terminal,
+  Palette,
+  TrendingUp,
+} from "lucide-react";
+import LearnMoreButton from "../Aboutus/Bsix";
 
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
+// ---------------------------------------------------------------------------
+// Premium heading animation — 3D letter flip-up reveal + flowing gradient sheen
+// ---------------------------------------------------------------------------
+const PremiumHeading = ({ text, className, delay = 0, gradient = false }) => {
+  const letters = text.split("");
 
-// Dynamically import the GIF showcase (keeps parity with the old 3D scene import pattern)
-const GifShowcase = dynamic(() => import("./GifShowcase"), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-full bg-[#0d3155] animate-pulse rounded-2xl" />
-  ),
-});
+  const container = {
+    hidden: {},
+    visible: {
+      transition: { staggerChildren: 0.028, delayChildren: delay },
+    },
+  };
 
-const HeroSection: React.FC = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const leftColRef = useRef<HTMLDivElement>(null);
-  const rightColRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
-  const eyebrowRef = useRef<HTMLDivElement>(null);
-  const subtextRef = useRef<HTMLParagraphElement>(null);
-  const buttonsRef = useRef<HTMLDivElement>(null);
-  const trustRef = useRef<HTMLDivElement>(null);
-  const orbOneRef = useRef<HTMLDivElement>(null);
-  const orbTwoRef = useRef<HTMLDivElement>(null);
-
-  // Initialize Lenis smooth scrolling
-  useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      direction: "vertical",
-      gestureDirection: "vertical",
-      smooth: true,
-      smoothTouch: false,
-      touchMultiplier: 2,
-    });
-
-    // Keep GSAP's ScrollTrigger in sync with Lenis' virtual scroll
-    lenis.on("scroll", ScrollTrigger.update);
-
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
-
-  // Premium scroll-reveal: left content slides in from the left,
-  // right visual slides in from the right, with a soft parallax drift
-  // on the background orbs as the user scrolls. Wrapped in gsap.context
-  // + matchMedia so it behaves correctly across breakpoints and cleans
-  // up properly on unmount.
-  useEffect(() => {
-    if (!sectionRef.current) return;
-
-    const ctx = gsap.context(() => {
-      const mm = gsap.matchMedia();
-
-      // Desktop / tablet: full premium motion
-      mm.add("(min-width: 768px)", () => {
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 85%",
-            end: "top 20%",
-            toggleActions: "play none none reverse",
-          },
-          defaults: { ease: "power4.out" },
-        });
-
-        tl.fromTo(
-          eyebrowRef.current,
-          { x: -60, opacity: 0 },
-          { x: 0, opacity: 1, duration: 0.6 },
-          0,
-        )
-          .fromTo(
-            headlineRef.current,
-            { x: -80, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.9 },
-            0.1,
-          )
-          .fromTo(
-            subtextRef.current,
-            { x: -60, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.8 },
-            0.25,
-          )
-          .fromTo(
-            buttonsRef.current,
-            { x: -40, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.7 },
-            0.35,
-          )
-          .fromTo(
-            trustRef.current,
-            { x: -30, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.6 },
-            0.45,
-          )
-          .fromTo(
-            rightColRef.current,
-            { x: 100, opacity: 0, scale: 0.92 },
-            { x: 0, opacity: 1, scale: 1, duration: 1.1 },
-            0.15,
-          );
-
-        // Subtle parallax drift on the glow orbs while scrolling through
-        gsap.to(orbOneRef.current, {
-          y: -80,
-          x: 30,
-          ease: "none",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 1,
-          },
-        });
-        gsap.to(orbTwoRef.current, {
-          y: 80,
-          x: -30,
-          ease: "none",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 1,
-          },
-        });
-
-        return () => tl.kill();
-      });
-
-      // Mobile: lighter, faster reveal — no heavy parallax, no scale jump
-      mm.add("(max-width: 767px)", () => {
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 90%",
-            toggleActions: "play none none reverse",
-          },
-          defaults: { ease: "power3.out", duration: 0.6 },
-        });
-
-        tl.fromTo(
-          leftColRef.current,
-          { y: 40, opacity: 0 },
-          { y: 0, opacity: 1 },
-          0,
-        ).fromTo(
-          rightColRef.current,
-          { y: 40, opacity: 0 },
-          { y: 0, opacity: 1 },
-          0.15,
-        );
-
-        return () => tl.kill();
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
-
-  // Parallax effect on mouse move (desktop only — skipped on touch)
-  useEffect(() => {
-    const mm = window.matchMedia("(min-width: 1024px)");
-    if (!mm.matches) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!sectionRef.current) return;
-
-      const rect = sectionRef.current.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width - 0.5;
-      const y = (e.clientY - rect.top) / rect.height - 0.5;
-
-      gsap.to(headlineRef.current, {
-        x: x * 20,
-        y: y * 20,
-        duration: 0.6,
-        overwrite: "auto",
-      });
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+  const letter = {
+    hidden: { opacity: 0, y: 36, rotateX: 70 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      rotateX: 0,
+      transition: { type: "spring", stiffness: 260, damping: 22 },
+    },
+  };
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative min-h-[100svh] w-full overflow-hidden bg-[#113E6E]"
+    <motion.div
+      className={`${className} ${gradient ? "premium-sheen" : ""}`}
+      style={{ perspective: 800, display: "flex", flexWrap: "wrap" }}
+      variants={container}
+      initial="hidden"
+      animate="visible"
     >
-      {/* Background gradient orbs for atmosphere */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {letters.map((ch, i) => (
+        <motion.span
+          key={i}
+          variants={letter}
+          style={{ display: "inline-block", transformStyle: "preserve-3d" }}
+        >
+          {ch === " " ? "\u00A0" : ch}
+        </motion.span>
+      ))}
+    </motion.div>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Premium 3D Orbiting Service Circle — bigger, mouse-tilt parallax, glass UI
+// ---------------------------------------------------------------------------
+const ServiceCircle = () => {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const services = useMemo(
+    () => [
+      { name: "Web Development", Icon: Code2, color: "#FF6B6B" },
+      { name: "Mobile Apps", Icon: Smartphone, color: "#4ECDC4" },
+      { name: "Cloud & DevOps", Icon: Cloud, color: "#3FA9F5" },
+      { name: "Software Development", Icon: Terminal, color: "#A78BFA" },
+      { name: "UI/UX Design", Icon: Palette, color: "#FF8B94" },
+      { name: "Digital Marketing", Icon: TrendingUp, color: "#34D399" },
+    ],
+    [],
+  );
+
+  const angleStep = 360 / services.length;
+
+  // ---- Mouse-driven 3D tilt (premium parallax) ----
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const rotateX = useSpring(useTransform(my, [-0.5, 0.5], [14, -14]), {
+    stiffness: 150,
+    damping: 18,
+    mass: 0.4,
+  });
+  const rotateY = useSpring(useTransform(mx, [-0.5, 0.5], [-14, 14]), {
+    stiffness: 150,
+    damping: 18,
+    mass: 0.4,
+  });
+
+  const handleMouseMove = useCallback(
+    (e) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      mx.set((e.clientX - rect.left) / rect.width - 0.5);
+      my.set((e.clientY - rect.top) / rect.height - 0.5);
+    },
+    [mx, my],
+  );
+
+  const handleMouseLeave = useCallback(() => {
+    mx.set(0);
+    my.set(0);
+  }, [mx, my]);
+
+  if (!isMounted) return null;
+
+  return (
+    <div
+      className="relative flex items-center justify-center mx-auto orbit-stage"
+      style={{ perspective: "1400px" }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      <style>{`
+        .orbit-stage {
+          width: clamp(300px, 48vw, 520px);
+          height: clamp(300px, 48vw, 520px);
+        }
+
+        @keyframes orbit-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes orbit-spin-reverse { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+        @keyframes ring-spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes ring-spin-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+        @keyframes luxury-gradient {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes pulse-glow {
+          0%, 100% {
+            box-shadow: 0 24px 60px -14px rgba(0,0,0,0.35),
+              inset -10px -12px 24px rgba(0,0,0,0.22),
+              inset 8px 10px 20px rgba(255,255,255,0.25);
+          }
+          50% {
+            box-shadow: 0 30px 80px -10px rgba(0,0,0,0.45),
+              inset -10px -12px 24px rgba(0,0,0,0.22),
+              inset 8px 10px 20px rgba(255,255,255,0.35);
+          }
+        }
+        @keyframes blob-float-1 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(18px, -14px) scale(1.08); }
+        }
+        @keyframes blob-float-2 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(-16px, 16px) scale(1.06); }
+        }
+        @keyframes blob-float-3 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(10px, 18px) scale(1.05); }
+        }
+
+        .orbit-ring { animation: orbit-spin 28s linear infinite; will-change: transform; }
+        .orbit-stage:hover .orbit-ring { animation-play-state: paused; }
+        .orbit-item-face { animation: orbit-spin-reverse 28s linear infinite; will-change: transform; }
+        .orbit-stage:hover .orbit-item-face { animation-play-state: paused; }
+
+        .aurora-blob-1 { animation: blob-float-1 9s ease-in-out infinite; }
+        .aurora-blob-2 { animation: blob-float-2 11s ease-in-out infinite; }
+        .aurora-blob-3 { animation: blob-float-3 10s ease-in-out infinite; }
+
+        @media (prefers-reduced-motion: reduce) {
+          .orbit-ring, .orbit-item-face, .center-sphere, .outer-ring, .middle-ring,
+          .aurora-blob-1, .aurora-blob-2, .aurora-blob-3 { animation: none !important; }
+        }
+      `}</style>
+
+      {/* Ambient aurora glow blobs — premium depth behind the sphere */}
+      <div
+        className="absolute rounded-full blur-3xl opacity-30 aurora-blob-1 pointer-events-none"
+        style={{
+          width: "55%",
+          height: "55%",
+          top: "0%",
+          left: "5%",
+          background: "#FF6B6B",
+        }}
+      />
+      <div
+        className="absolute rounded-full blur-3xl opacity-25 aurora-blob-2 pointer-events-none"
+        style={{
+          width: "50%",
+          height: "50%",
+          bottom: "0%",
+          right: "0%",
+          background: "#3FA9F5",
+        }}
+      />
+      <div
+        className="absolute rounded-full blur-3xl opacity-25 aurora-blob-3 pointer-events-none"
+        style={{
+          width: "45%",
+          height: "45%",
+          bottom: "8%",
+          left: "0%",
+          background: "#A78BFA",
+        }}
+      />
+
+      {/* Ground shadow for 3D grounding */}
+      <div className="absolute bottom-0 w-1/3 h-6 sm:h-8 rounded-full bg-gray-900/20 blur-2xl" />
+
+      {/* Mouse-tilt 3D wrapper — everything below tilts together like a real object */}
+      <motion.div
+        className="absolute inset-0 flex items-center justify-center"
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+      >
+        {/* Outer conic ring */}
         <div
-          ref={orbOneRef}
-          className="absolute top-0 left-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-gradient-to-br from-cyan-500/20 via-purple-500/10 to-transparent rounded-full blur-3xl animate-pulse"
+          className="absolute outer-ring"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: "50%",
+            opacity: 0.6,
+            background:
+              "conic-gradient(from 0deg, #FF6B6B 0%, #4ECDC4 15%, #3FA9F5 30%, #A78BFA 45%, #FF8B94 60%, #34D399 75%, #FF6B6B 100%)",
+            maskImage:
+              "radial-gradient(circle, transparent 68%, black 69%, black 72%, transparent 73%)",
+            WebkitMaskImage:
+              "radial-gradient(circle, transparent 68%, black 69%, black 72%, transparent 73%)",
+            animation: "ring-spin-slow 18s linear infinite",
+            filter: "drop-shadow(0 8px 20px rgba(0,0,0,0.12))",
+          }}
+        />
+
+        {/* Glass dashed guide ring */}
+        <div
+          className="absolute middle-ring backdrop-blur-[1px]"
+          style={{
+            width: "68%",
+            height: "68%",
+            borderRadius: "50%",
+            border: "2px dashed rgba(148, 163, 184, 0.4)",
+            animation: "ring-spin-reverse 22s linear infinite",
+          }}
+        />
+
+        {/* Static glass hairline rims */}
+        <div
+          className="absolute rounded-full"
+          style={{
+            width: "100%",
+            height: "100%",
+            border: "1px solid rgba(255,255,255,0.5)",
+            boxShadow: "inset 0 1px 8px rgba(255,255,255,0.4)",
+          }}
         />
         <div
-          ref={orbTwoRef}
-          className="absolute bottom-0 right-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-gradient-to-tl from-blue-500/20 via-purple-500/10 to-transparent rounded-full blur-3xl animate-pulse"
+          className="absolute rounded-full"
+          style={{
+            width: "68%",
+            height: "68%",
+            border: "1px solid rgba(209,213,219,0.4)",
+          }}
         />
-      </div>
 
-      <div className="relative z-10 min-h-[100svh] lg:h-screen flex items-center justify-center">
-        <div className="w-full max-w-7xl mx-auto px-14 sm:px-6 lg:px-8 py-16 sm:py-20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-12 lg:gap-8 items-center">
-            {/* Left Content */}
-            <div
-              ref={leftColRef}
-              className="flex flex-col justify-center space-y-5 sm:space-y-6"
-            >
-              {/* Main Headline — small, premium scale */}
-              <h1
-                ref={headlineRef}
-                className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold leading-tight text-white"
-              >
-                <span className="block">
-                  IT Services Company in Odisha Helping Businesses Grow Online
-                </span>
-              </h1>
+        {/* Center sphere with logo */}
+        <motion.div
+          className="absolute rounded-full flex items-center justify-center center-sphere"
+          style={{
+            width: "36%",
+            height: "36%",
+            background:
+              "linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 25%, #3FA9F5 50%, #A78BFA 75%, #FF8B94 100%)",
+            backgroundSize: "400% 400%",
+            animation:
+              "luxury-gradient 8s ease infinite, pulse-glow 4s ease-in-out infinite",
+          }}
+          whileHover={{
+            scale: 1.1,
+            rotate: -4,
+            transition: { type: "spring", stiffness: 300, damping: 20 },
+          }}
+        >
+          <div
+            className="absolute top-[10%] left-[16%] w-[40%] h-[30%] rounded-full opacity-75 blur-[2px] pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%)",
+            }}
+          />
+          <div
+            className="absolute inset-0 rounded-full pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(circle at 50% 50%, transparent 58%, rgba(0,0,0,0.22) 100%)",
+            }}
+          />
+          <div className="relative w-[70%] h-[70%]">
+            <Image
+              src="/Images/GT Transparent logo.png"
+              alt="Growwyld Tech logo"
+              fill
+              sizes="(max-width: 640px) 80px, (max-width: 1024px) 110px, 150px"
+              className="object-contain drop-shadow-lg"
+              priority
+              quality={85}
+              draggable={false}
+            />
+          </div>
+        </motion.div>
 
-              {/* Supporting text */}
-              <p
-                ref={subtextRef}
-                className="text-sm sm:text-base text-slate-300 max-w-md leading-relaxed"
-              >
-                Growwyld Tech is a trusted IT Services Company in Odisha helping
-                businesses transform ideas into meaningful digital experiences.
-                From creating high-performing websites to improving online
-                visibility and customer engagement, we deliver practical digital
-                solutions that support long-term business growth.
-              </p>
-
-              {/* CTA Buttons */}
+        {/* Orbiting glass-card service icons */}
+        <div className="absolute inset-0 orbit-ring">
+          {services.map(({ name, Icon, color }, index) => {
+            const angle = angleStep * index;
+            return (
               <div
-                ref={buttonsRef}
-                className="flex flex-col sm:flex-row gap-4 pt-2 sm:pt-4"
+                key={name}
+                className="absolute top-1/2 left-1/2"
+                style={{
+                  width: 0,
+                  height: 0,
+                  transform: `rotate(${angle}deg) translateY(calc(-1 * clamp(130px, 24vw, 220px)))`,
+                }}
               >
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="group relative px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-sm font-semibold rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/50"
+                <div
+                  className="orbit-item-face"
+                  style={{ transform: `rotate(${-angle}deg)` }}
                 >
-                  <span className="relative z-10 flex items-center justify-center gap-2">
-                    Get Started
-                    <svg
-                      className="w-4 h-4 group-hover:translate-x-1 transition-transform"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                  <motion.div
+                    className="flex flex-col items-center gap-1.5 group cursor-pointer -translate-x-1/2 -translate-y-1/2"
+                    whileHover={{ scale: 1.2, y: -4 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  >
+                    <div
+                      className="relative flex items-center justify-center rounded-2xl backdrop-blur-md transition-shadow duration-300"
+                      style={{
+                        width: "clamp(46px, 9vw, 64px)",
+                        height: "clamp(46px, 9vw, 64px)",
+                        background: `linear-gradient(135deg, ${color}22, rgba(255,255,255,0.65))`,
+                        border: `1.5px solid ${color}66`,
+                        boxShadow: `0 10px 24px -8px ${color}55, inset 0 1px 2px rgba(255,255,255,0.6)`,
+                      }}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                      <Icon
+                        className="transition-transform duration-300 group-hover:scale-110"
+                        style={{ width: "46%", height: "46%", color }}
+                        strokeWidth={2.2}
                       />
-                    </svg>
-                  </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </motion.button>
-
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="group px-6 py-3 border-2 border-slate-400 text-slate-300 text-sm font-semibold rounded-lg hover:border-cyan-400 hover:text-cyan-400 transition-all duration-300 hover:bg-cyan-500/10 hover:shadow-lg hover:shadow-cyan-500/20"
-                >
-                  <span className="flex items-center justify-center gap-2">
-                    Explore Services
-                    <svg
-                      className="w-4 h-4 group-hover:translate-x-1 transition-transform"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 7l5 5m0 0l-5 5m5-5H6"
-                      />
-                    </svg>
-                  </span>
-                </motion.button>
+                      <div className="absolute inset-0 rounded-2xl bg-white/0 group-hover:bg-white/20 transition-colors duration-300 pointer-events-none" />
+                    </div>
+                    <p className="text-[8px] sm:text-[10px] lg:text-[11px] font-semibold text-gray-700 text-center whitespace-nowrap px-1.5 py-0.5 rounded-full bg-white/70 backdrop-blur-sm shadow-sm group-hover:text-gray-900 transition-colors duration-300">
+                      {name}
+                    </p>
+                  </motion.div>
+                </div>
               </div>
-            </div>
+            );
+          })}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
-            {/* Right - Auto-cycling GIF showcase */}
-            <div
-              ref={rightColRef}
-              className="relative w-full aspect-square sm:aspect-[4/3] lg:aspect-auto lg:h-full min-h-[320px] lg:min-h-[600px]"
-            >
-              <GifShowcase />
+// ---------------------------------------------------------------------------
+// Main Hero Section Component
+// ---------------------------------------------------------------------------
+export default function HeroSection() {
+  const lenisRef = React.useRef(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
+    if (typeof window !== "undefined" && window.__lenisInstance) {
+      return;
+    }
+
+    const lenis = new Lenis({
+      duration: 1.1,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: "vertical",
+      gestureOrientation: "vertical",
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 1.5,
+      infinite: false,
+    });
+
+    if (typeof window !== "undefined") {
+      window.__lenisInstance = lenis;
+    }
+    lenisRef.current = lenis;
+
+    let frameId = null;
+    function raf(time) {
+      lenis.raf(time);
+      frameId = requestAnimationFrame(raf);
+    }
+    frameId = requestAnimationFrame(raf);
+
+    return () => {
+      if (frameId) cancelAnimationFrame(frameId);
+      lenis.destroy();
+      if (typeof window !== "undefined") {
+        window.__lenisInstance = null;
+      }
+    };
+  }, [isMounted]);
+
+  if (!isMounted) {
+    return (
+      <div className="relative min-h-screen bg-white overflow-hidden">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-40 pb-12 sm:pb-16 lg:pb-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div className="space-y-6 sm:space-y-8 order-2 lg:order-1">
+              <div className="h-32 bg-gray-200 rounded animate-pulse" />
+              <div className="h-20 bg-gray-200 rounded animate-pulse" />
+            </div>
+            <div className="order-1 lg:order-2">
+              <div className="h-96 bg-gray-200 rounded-full animate-pulse" />
             </div>
           </div>
         </div>
       </div>
-    </section>
-  );
-};
+    );
+  }
 
-export default HeroSection;
+  return (
+    <div className="relative min-h-screen bg-white overflow-hidden">
+      <style>{`
+        .premium-sheen {
+          background-size: 250% 100%;
+          animation: sheen-move 5s ease-in-out infinite;
+        }
+        @keyframes sheen-move {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .premium-sheen { animation: none !important; }
+        }
+      `}</style>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-40 pb-12 sm:pb-16 lg:pb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          {/* Left Content */}
+          <div className="space-y-6 sm:space-y-8 order-2 lg:order-1">
+            <div className="space-y-3">
+              <PremiumHeading
+                text="IT Services Company in Odisha"
+                className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight"
+                delay={0.1}
+              />
+              <PremiumHeading
+                text="Helping Businesses Grow Online"
+                className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-teal-600 bg-clip-text text-transparent leading-tight"
+                delay={0.5}
+                gradient
+              />
+            </div>
+
+            <motion.p
+              className="text-sm sm:text-base lg:text-lg text-gray-700 leading-relaxed max-w-md"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.1 }}
+            >
+              Growwyld Tech is a trusted IT Services Company in Odisha helping
+              businesses transform ideas into meaningful digital experiences.
+              From creating high-performing websites to improving online
+              visibility and customer engagement, we deliver practical digital
+              solutions that support long-term business growth.
+            </motion.p>
+
+            <motion.div
+              className="flex flex-col sm:flex-row gap-4 pt-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.25 }}
+            >
+              <LearnMoreButton />
+            </motion.div>
+          </div>
+
+          {/* Right Content - Service Circle */}
+          <motion.div
+            className="order-1 lg:order-2 flex justify-center items-center w-full"
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          >
+            <ServiceCircle />
+          </motion.div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <motion.div
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+        >
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-xs sm:text-sm text-gray-600">
+              Scroll to explore
+            </p>
+            <svg
+              className="w-5 h-5 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"
+              />
+            </svg>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}

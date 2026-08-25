@@ -209,9 +209,6 @@ function useLenisGsap() {
       ScrollTrigger.update();
     };
     gsap.ticker.add(tick);
-    // FIX: lagSmoothing(0) makes GSAP snap instead of smoothing frame
-    // drops, which *feels* laggier when the main thread hitches (e.g.
-    // during heavy 3D compositing below). Give it real smoothing.
     gsap.ticker.lagSmoothing(500, 33);
 
     const refresh = () => ScrollTrigger.refresh();
@@ -228,7 +225,7 @@ function useLenisGsap() {
 }
 
 /* -------------------------------------------------------------------- */
-/*  Generic scroll-reveal hook — now supports "coming AND going"         */
+/*  Generic scroll-reveal hook                                           */
 /* -------------------------------------------------------------------- */
 
 function useReveal<T extends HTMLElement>(opts?: {
@@ -238,7 +235,6 @@ function useReveal<T extends HTMLElement>(opts?: {
   delay?: number;
   ease?: string;
   start?: string;
-  /** If true, animation reverses out on scroll-up and replays on re-entry. */
   replay?: boolean;
 }) {
   const ref = useRef<T | null>(null);
@@ -274,7 +270,7 @@ function useReveal<T extends HTMLElement>(opts?: {
 }
 
 /* -------------------------------------------------------------------- */
-/*  Moving brand logo (unchanged — this one was fine)                    */
+/*  Moving brand logo                                                    */
 /* -------------------------------------------------------------------- */
 
 function BrandMark({ size = 56 }: { size?: number }) {
@@ -355,11 +351,7 @@ function BrandMark({ size = 56 }: { size?: number }) {
 }
 
 /* -------------------------------------------------------------------- */
-/*  Card tilt — FIX: GSAP now owns 100% of the transform, no CSS         */
-/*  transition on `transform` anywhere near this element anymore.       */
-/*  Lift-on-hover is now also done via quickTo(y) instead of a           */
-/*  Tailwind `hover:-translate-y` class, so there's exactly ONE writer   */
-/*  of `transform` at all times.                                        */
+/*  Card tilt                                                            */
 /* -------------------------------------------------------------------- */
 
 function useCardTilt() {
@@ -391,7 +383,7 @@ function useCardTilt() {
     function handleEnter() {
       hovering = true;
       card!.style.willChange = "transform";
-      quickY(-10); // replaces hover:-translate-y-2.5
+      quickY(-10);
     }
 
     function handleMove(e: MouseEvent) {
@@ -400,8 +392,8 @@ function useCardTilt() {
       const px = (e.clientX - rect.left) / rect.width;
       const py = (e.clientY - rect.top) / rect.height;
 
-      quickRotX(6 - py * 12); // gentler than before: 0..1 -> 6..-6
-      quickRotY(px * 12 - 6); // 0..1 -> -6..6
+      quickRotX(6 - py * 12);
+      quickRotY(px * 12 - 6);
 
       card!.style.setProperty("--mx", `${px * 100}%`);
       card!.style.setProperty("--my", `${py * 100}%`);
@@ -465,9 +457,6 @@ function CategoryCard({
           onOpen(index);
         }
       }}
-      // FIX: dropped `hover:-translate-y-2.5` and `transform` from the
-      // CSS transition list — GSAP quickTo owns transform exclusively now.
-      // Kept box-shadow/border-color, they're cheap and don't conflict.
       className={`premium-card-teal group relative flex cursor-pointer flex-col overflow-hidden rounded-[36px] border-2 border-[#113E6E]/12 bg-white outline-none
           transition-[box-shadow,border-color] duration-500 ease-out
           hover:border-[#22C55E] hover:shadow-[0_45px_100px_-24px_rgba(17,62,110,0.35)]
@@ -502,7 +491,7 @@ function CategoryCard({
             src={cat.image}
             alt={cat.title}
             fill
-            sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 50vw, 15vw"
+            sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 50vw, 25vw"
             className="object-cover"
           />
         </div>
@@ -917,15 +906,6 @@ export default function ServicesSection() {
 
   useLenisGsap();
 
-  /* ------------------------------------------------------------------ */
-  /*  FIX: card entrance now:                                            */
-  /*  - much lighter 3D (rotateY 58deg -> 20deg, rotateX 6 -> 3)         */
-  /*  - runs as ONE timeline instead of N separate gsap.fromTo calls      */
-  /*  - uses toggleActions so cards fade back out on scroll-up and        */
-  /*    replay on scroll-down re-entry ("coming and going")               */
-  /*  - autoAlpha instead of opacity (skips paint/hit-test while hidden)  */
-  /*  - will-change is applied once per section visibility, not per-tween */
-  /* ------------------------------------------------------------------ */
   useEffect(() => {
     const mm = gsap.matchMedia();
 
@@ -1069,9 +1049,6 @@ export default function ServicesSection() {
       id="services"
       className="relative overflow-hidden bg-white py-24 sm:py-28 md:py-30"
     >
-      {/* FIX: added `contain: paint` isolation via inline style so these
-          blurred/animated blobs don't force repaint of the whole section
-          while cards are animating in/out during scroll. */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{ contain: "paint" }}
@@ -1156,9 +1133,10 @@ export default function ServicesSection() {
           ))}
         </div>
 
+        {/* CHANGED: grid-cols from xl:grid-cols-3 to xl:grid-cols-4 for 4 cards on desktop */}
         <div
           ref={gridRef}
-          className="mt-12 grid grid-cols-1 gap-7 sm:gap-8 md:grid-cols-2 xl:grid-cols-3"
+          className="mt-12 grid grid-cols-1 gap-7 sm:gap-8 md:grid-cols-2 xl:grid-cols-4"
           style={{ perspective: 1600 }}
         >
           {CATEGORIES.map((cat, i) => (

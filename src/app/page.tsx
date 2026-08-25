@@ -11,6 +11,7 @@ import ProcessSection from "@/Components/Process/Process";
 import TechStackSection from "@/Components/TechStack/TechStack";
 import IndustriesSection from "@/Components/WeServe/WeServe";
 import HeroSection from "@/Components/Home/HeroSection";
+// import HeroSection from "@/Components/Home/HeroSection";
 
 export const metadata: Metadata = {
   title: "IT Services Company in Odisha, India | Growwyld Tech",

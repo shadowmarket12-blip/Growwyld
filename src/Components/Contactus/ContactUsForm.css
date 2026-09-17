@@ -1,0 +1,486 @@
+/* Container */
+.contact-form-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: transparent;
+  padding: 2rem 0;
+  perspective: 1000px;
+}
+
+/* Form - Curvy Card Design */
+.contact-form {
+  position: relative;
+  display: block;
+  padding: 3rem;
+  max-width: 600px;
+  width: 100%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  overflow: hidden;
+  z-index: 10;
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.95) 0%,
+    rgba(22, 163, 74, 0.9) 50%,
+    rgba(21, 128, 61, 0.95) 100%
+  );
+  box-shadow:
+    0 20px 60px rgba(34, 197, 94, 0.4),
+    0 10px 20px rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+  transform: rotateX(2deg) rotateY(-2deg);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  border-radius: 30px;
+  animation: morphing 8s ease-in-out infinite;
+  will-change: border-radius, transform;
+}
+
+.contact-form:hover {
+  transform: rotateX(0deg) rotateY(0deg) scale(1.02);
+  box-shadow:
+    0 25px 70px rgba(34, 197, 94, 0.5),
+    0 15px 30px rgba(0, 0, 0, 0.4),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+  animation-play-state: paused;
+}
+
+/* Input Wrapper */
+.input-wrapper {
+  position: relative;
+  margin-top: 1.25rem;
+  z-index: 2;
+}
+
+.input-wrapper:first-child {
+  margin-top: 0;
+}
+
+/* Input Fields - Curvy Design with Full Visibility */
+.input-focus {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 1rem 1.25rem;
+  font-size: 1rem;
+  width: 100%;
+  outline: none;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border-radius: 15px;
+  color: #333;
+  -webkit-text-fill-color: #333;
+  opacity: 1;
+  visibility: visible;
+  position: relative;
+  z-index: 3;
+  pointer-events: auto;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.input-focus:focus {
+  box-shadow:
+    0 0 20px rgba(17, 62, 110, 0.5),
+    0 4px 6px rgba(0, 0, 0, 0.1);
+  border-color: #113e6e;
+  transform: translateY(-2px);
+  border-radius: 20px;
+  color: #111;
+  -webkit-text-fill-color: #111;
+  background: #ffffff;
+}
+
+.input-focus:hover {
+  box-shadow:
+    0 6px 12px rgba(0, 0, 0, 0.15),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.input-focus::placeholder {
+  transition: opacity 0.3s ease;
+  color: #6b7280;
+  opacity: 1;
+  -webkit-text-fill-color: #6b7280;
+}
+
+.input-focus:focus::placeholder {
+  opacity: 0;
+}
+
+/* Select Input - Ensure visibility */
+.select-input {
+  color: #374151;
+  cursor: pointer;
+  -webkit-text-fill-color: #374151;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+  padding-right: 3rem;
+}
+
+.select-input option {
+  color: #333;
+  -webkit-text-fill-color: #333;
+  background: #fff;
+  padding: 0.5rem;
+}
+
+/* Textarea */
+.textarea-input {
+  resize: none;
+  min-height: 150px;
+  border-radius: 15px;
+  color: #333;
+  -webkit-text-fill-color: #333;
+}
+
+.textarea-input:focus {
+  border-radius: 20px;
+  color: #111;
+  -webkit-text-fill-color: #111;
+}
+
+/* Stars Background - Behind everything */
+.stars-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background-size: cover;
+  overflow: hidden;
+  animation: animateBg 50s linear infinite;
+  background:
+    radial-gradient(
+      circle at 20% 80%,
+      rgba(17, 62, 110, 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(17, 62, 110, 0.2) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(17, 62, 110, 0.1) 0%,
+      transparent 70%
+    );
+  pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: #113e6e;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.star-1 {
+  top: 0;
+  right: 0;
+  left: auto;
+  box-shadow:
+    0 0 0 4px rgba(17, 62, 110, 0.2),
+    0 0 0 8px rgba(17, 62, 110, 0.15),
+    0 0 20px rgba(17, 62, 110, 0.3);
+  animation: star1 1s linear infinite;
+  animation-delay: 0s;
+}
+
+.star-2 {
+  top: 0;
+  right: 150px;
+  left: auto;
+  box-shadow:
+    0 0 0 4px rgba(17, 62, 110, 0.2),
+    0 0 0 8px rgba(17, 62, 110, 0.15),
+    0 0 20px rgba(17, 62, 110, 0.3);
+  animation: star2 3s linear infinite;
+  animation-delay: 0.2s;
+}
+
+.star-3 {
+  top: 0;
+  right: 300px;
+  left: auto;
+  box-shadow:
+    0 0 0 4px rgba(17, 62, 110, 0.2),
+    0 0 0 8px rgba(17, 62, 110, 0.15),
+    0 0 20px rgba(17, 62, 110, 0.3);
+  animation: star3 2.75s linear infinite;
+  animation-delay: 2.75s;
+}
+
+.star-4 {
+  top: 0;
+  right: -300px;
+  left: auto;
+  box-shadow:
+    0 0 0 4px rgba(17, 62, 110, 0.2),
+    0 0 0 8px rgba(17, 62, 110, 0.15),
+    0 0 20px rgba(17, 62, 110, 0.3);
+  animation: star4 1.6s linear infinite;
+  animation-delay: 1.6s;
+}
+
+.star-trail {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 300px;
+  height: 2px;
+  background: linear-gradient(90deg, #113e6e, transparent);
+}
+
+/* Submit Button - Curvy Design */
+.submit-button {
+  position: relative;
+  display: block;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #113e6e 0%, #1a5a9c 100%);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  width: 100%;
+  text-transform: uppercase;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  margin-top: 1.5rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 20px;
+  box-shadow:
+    0 6px 12px rgba(17, 62, 110, 0.3),
+    0 2px 4px rgba(17, 62, 110, 0.2);
+  z-index: 3;
+  position: relative;
+}
+
+.submit-button:hover {
+  border-radius: 25px;
+  box-shadow:
+    0 10px 20px rgba(17, 62, 110, 0.4),
+    0 4px 8px rgba(17, 62, 110, 0.3);
+  transform: translateY(-2px);
+}
+
+.submit-button:active {
+  transform: translateY(0);
+  box-shadow:
+    0 4px 8px rgba(17, 62, 110, 0.3),
+    0 2px 4px rgba(17, 62, 110, 0.2);
+  border-radius: 20px;
+}
+
+.button-text {
+  position: relative;
+  z-index: 10;
+  color: white;
+  -webkit-text-fill-color: white;
+}
+
+.shine-effect {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 0;
+  height: 85%;
+  opacity: 0;
+  background: white;
+  box-shadow: 0 0 50px 30px #fff;
+  transform: skewX(-20deg);
+}
+
+.submit-button:hover .shine-effect {
+  animation: sh02 0.5s 0s linear;
+}
+
+/* Animations */
+@keyframes sh02 {
+  from {
+    opacity: 0;
+    left: 0%;
+  }
+  50% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    left: 100%;
+  }
+}
+
+@keyframes animateBg {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+@keyframes morphing {
+  0% {
+    border-radius: 25px 35px 25px 35px / 35px 25px 35px 25px;
+  }
+  25% {
+    border-radius: 35px 25px 35px 25px / 25px 35px 25px 35px;
+  }
+  50% {
+    border-radius: 30px 40px 30px 40px / 40px 30px 40px 30px;
+  }
+  75% {
+    border-radius: 40px 30px 40px 30px / 30px 40px 30px 40px;
+  }
+  100% {
+    border-radius: 25px 35px 25px 35px / 35px 25px 35px 25px;
+  }
+}
+
+@keyframes star1 {
+  0% {
+    transform: rotate(315deg) translateX(0);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(315deg) translateX(-1000px);
+    opacity: 0;
+  }
+}
+
+@keyframes star2 {
+  0% {
+    transform: rotate(315deg) translateX(0);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(315deg) translateX(-1000px);
+    opacity: 0;
+  }
+}
+
+@keyframes star3 {
+  0% {
+    transform: rotate(315deg) translateX(0);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(315deg) translateX(-1000px);
+    opacity: 0;
+  }
+}
+
+@keyframes star4 {
+  0% {
+    transform: rotate(315deg) translateX(0);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(315deg) translateX(-1000px);
+    opacity: 0;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .contact-form {
+    padding: 2rem;
+    max-width: 90%;
+    transform: none;
+    border-radius: 20px;
+    animation: none;
+  }
+
+  .contact-form:hover {
+    transform: scale(1.02);
+    border-radius: 20px;
+  }
+
+  .input-focus {
+    border-radius: 12px;
+    font-size: 0.95rem;
+  }
+
+  .input-focus:focus {
+    border-radius: 16px;
+  }
+
+  .textarea-input {
+    border-radius: 12px;
+  }
+
+  .textarea-input:focus {
+    border-radius: 16px;
+  }
+
+  .submit-button {
+    border-radius: 16px;
+  }
+
+  .submit-button:hover {
+    border-radius: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-form {
+    padding: 1.5rem;
+    max-width: 95%;
+    border-radius: 15px;
+  }
+
+  .input-focus {
+    padding: 0.875rem 1rem;
+    font-size: 0.875rem;
+    border-radius: 10px;
+  }
+
+  .input-focus:focus {
+    border-radius: 14px;
+  }
+
+  .textarea-input {
+    min-height: 120px;
+    border-radius: 10px;
+  }
+
+  .textarea-input:focus {
+    border-radius: 14px;
+  }
+
+  .submit-button {
+    border-radius: 14px;
+    font-size: 0.9rem;
+  }
+
+  .submit-button:hover {
+    border-radius: 18px;
+  }
+}

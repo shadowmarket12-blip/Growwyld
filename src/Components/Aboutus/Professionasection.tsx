@@ -33,12 +33,10 @@ const body = Inter({
 /* ------------------------------------------------------------------ */
 
 const FEATURES = [
-  "Tailored Strategies",
-  "End-to-End Expertise",
-  "Results-Driven Approach",
-  "Transparent Collaboration",
-  "Scalable Solutions",
-  "Innovation Focused",
+  "Transparent Communication",
+  "Result-Driven Strategies",
+  "Tailored Solutions",
+  "Long-Term Partnership",
 ];
 
 const STATS = [
@@ -91,7 +89,11 @@ function useDonutSegments() {
   });
 }
 
-export default function WhyChooseSection() {
+/* ------------------------------------------------------------------ */
+/* Component                                                           */
+/* ------------------------------------------------------------------ */
+
+export default function GrowthPartnerHero() {
   const prefersReducedMotion = useReducedMotion();
   const sectionRef = useRef<HTMLElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -189,6 +191,7 @@ export default function WhyChooseSection() {
           style={{ y: prefersReducedMotion ? 0 : yBlobB }}
           className="absolute -right-40 bottom-0 h-[26rem] w-[26rem] rounded-full bg-cyan-500/10 blur-[110px] will-change-transform"
         />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/5" />
       </div>
 
       <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-6 sm:px-8 lg:grid-cols-2 lg:gap-10 lg:px-12">
@@ -200,23 +203,31 @@ export default function WhyChooseSection() {
           viewport={{ once: true, amount: 0.4 }}
           className="max-w-xl"
         >
-          {/* <motion.span
+          <motion.span
             variants={itemReveal}
             className="inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.22em] text-emerald-600"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_2px_rgba(16,185,129,0.5)]" />
             Why choose GrowWyld Tech
-          </motion.span> */}
+          </motion.span>
 
           <motion.h1
             variants={itemReveal}
             className="mt-5 font-[family-name:var(--font-display)] text-4xl font-semibold leading-[1.08] tracking-tight text-gray-900 sm:text-5xl lg:text-[3.4rem]"
           >
-            Why Businesses Choose{" "}
+            Your Growth Partner{" "}
             <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">
-              Growwyld Tech
+              in the Digital World
             </span>
           </motion.h1>
+
+          <motion.p
+            variants={itemReveal}
+            className="mt-6 max-w-md text-base leading-relaxed text-gray-600 sm:text-lg"
+          >
+            We combine technology, strategy, and creativity to help your
+            business grow smarter and scale beyond boundaries.
+          </motion.p>
 
           <motion.ul variants={containerReveal} className="mt-8 space-y-3.5">
             {FEATURES.map((feature) => (

@@ -21,6 +21,12 @@ import Image from "next/image";
 
 import GooeyButton from "@/Components/Aboutus/bthr";
 import Link from "next/link";
+import ServicesSection3D from "@/Components/Aboutus/ServicesSection3D";
+import VisionSection3D from "@/Components/Aboutus/VisionSection3d";
+import ProfessionalsSection3D from "@/Components/Aboutus/Professionasection";
+import CardsHover from "@/Components/Aboutus/CardsHover ";
+import OurValues from "@/Components/Aboutus/OurValues";
+import Serve from "@/Components/Aboutus/Serve";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -791,250 +797,29 @@ const AboutPage = () => {
         {/* Founders                                                    */}
         {/* ---------------------------------------------------------- */}
         <section className="px-6 md:px-12 py-20 md:py-28 border-t border-[var(--line)]">
-          <div className="mx-auto max-w-7xl">
-            <h2 className="text-3xl md:text-[2.15rem] lg:text-[2.5rem] leading-[1.08] mb-6 text-black">
-              Built by Professionals Who Understand Both Technology and Growth
-            </h2>
-            <motion.div
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.3 }}
-              className="grid md:grid-cols-2 gap-6 py-10"
-            >
-              {founders.map((f) => (
-                <Card key={f.desc} {...f} />
-              ))}
-            </motion.div>
-          </div>
+          {/* <ProfessionalsSection3D /> */}
         </section>
-
-        {/* How Do We Help Businesses Grow Online? */}
-        {/* <section className="px-6 md:px-12 py-20 md:py-28 border-t border-[var(--line)]">
-          <div className="mx-auto max-w-7xl">
-            <div className="grid lg:grid-cols-2 gap-14 items-start">
-              <div>
-                <h2 className="text-4xl md:text-4xl lg:text-[3rem] leading-[1.05] mb-6 text-black">
-                  How Do We Help Businesses Grow Online?
-                </h2>
-                <motion.div
-                  variants={staggerContainer}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true, amount: 0.4 }}
-                  className="space-y-5 text-base md:text-lg leading-relaxed text-black max-w-xl"
-                >
-                  <motion.p variants={fadeUp}>
-                    We help businesses establish, strengthen, and scale their
-                    digital presence through a combination of technology,
-                    strategy, and creativity. From professional websites and
-                    custom web applications to SEO, local search optimization,
-                    content marketing, and digital growth strategies, our
-                    solutions are designed to help businesses improve
-                    visibility, attract the right audience, and create long-term
-                    opportunities.
-                  </motion.p>
-                </motion.div>
-              </div>
-
-              <motion.div
-                variants={fadeUp}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, amount: 0.4 }}
-                className="rounded-2xl border border-[var(--line)] bg-white p-8 md:p-10"
-              >
-                <span className="mb-5 block h-px w-10 bg-[var(--accent)]" />
-
-                <p className="text-black leading-relaxed text-base md:text-lg">
-                  Based in Bhubaneswar, we work with startups, healthcare
-                  organizations, educational institutions, real estate
-                  companies, manufacturers, service providers, and growing
-                  brands across India. Our focus remains the same regardless of
-                  industry—to deliver practical solutions that solve real
-                  business challenges.
-                </p>
-              </motion.div>
-            </div>
-
-            <IndustryPulse />
-          </div>
-        </section> */}
 
         {/* ---------------------------------------------------------- */}
         {/* Our Journey                                                 */}
         {/* ---------------------------------------------------------- */}
         <section className="px-6 md:px-12 py-20 md:py-28 border-t border-[var(--line)]">
-          <div className="mx-auto max-w-7xl">
-            <div className="grid lg:grid-cols-2 gap-14 items-start">
-              <div>
-                <h2 className="text-3xl md:text-[2.15rem] lg:text-[2.5rem] leading-[1.08] mb-6 text-black">
-                  Our Vision for the Future
-                </h2>
-                <motion.div
-                  variants={staggerContainer}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true, amount: 0.4 }}
-                  className="space-y-5 text-base md:text-lg leading-relaxed text-black max-w-xl"
-                >
-                  <motion.p variants={fadeUp}>
-                    Our vision is to become a trusted technology and digital
-                    growth partner for businesses across Odisha and India. We
-                    aim to help organizations embrace digital transformation,
-                    leverage emerging technologies, and build a stronger
-                    presence in an increasingly connected world.
-                  </motion.p>
-                </motion.div>
-              </div>
-
-              <motion.div
-                variants={fadeUp}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, amount: 0.4 }}
-                className="rounded-2xl border border-[var(--line)] bg-white p-8 md:p-10"
-              >
-                <span className="mb-5 block h-px w-10 bg-[var(--accent)]" />
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-2xl">🎯</span>
-                  <h3 className=" text-xl md:text-2xl text-black">
-                    The Vision
-                  </h3>
-                </div>
-                <p className="text-black leading-relaxed text-base md:text-lg">
-                  At Growwyld Tech, we believe technology should empower growth,
-                  create opportunities, and make it easier for businesses to
-                  achieve their goals. Every website we build, every strategy we
-                  create, and every solution we deliver is guided by that
-                  belief.
-                </p>
-              </motion.div>
-            </div>
-
-            {/* IT industry ecosystem visual — the "gif"-style signature moment */}
-          </div>
+          <VisionSection3D />
         </section>
 
         {/* ---------------------------------------------------------- */}
         {/* What makes us different                                    */}
         {/* ---------------------------------------------------------- */}
         <section className="px-6 md:px-12 py-20 md:py-28 border-t border-[var(--line)]">
-          <div className="mx-auto max-w-7xl">
-            <SectionHeading
-              eyebrow="Why Choose Us"
-              title="What makes Growwyld Tech different?"
-              align="left-wide"
-            />
-            <motion.div
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.3 }}
-              className="grid md:grid-cols-3 gap-6"
-            >
-              {differentiators.map((d) => (
-                <Card key={d.title} {...d} />
-              ))}
-            </motion.div>
-          </div>
+          {/* <Serve /> */}
         </section>
 
         {/* ---------------------------------------------------------- */}
         {/*  Services — optimized                                       */}
         {/* ---------------------------------------------------------- */}
         <section className="px-6 md:px-12 py-20 md:py-28 border-t border-[var(--line)]">
-          <div className="mx-auto max-w-7xl">
-            <h2 className="text-3xl md:text-[2.15rem] lg:text-[2.5rem] leading-[1.08] mb-6 text-black pb-10">
-              How do we help businesses grow online?
-            </h2>
-
-            <motion.div
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.2 }}
-              className="grid md:grid-cols-2 gap-6 lg:gap-8"
-            >
-              {services.map((s, index) => (
-                <motion.div
-                  key={index}
-                  variants={fadeUp}
-                  className="service-card group relative overflow-hidden rounded-2xl border border-[var(--line)] bg-white min-h-[400px] md:min-h-[500px] lg:min-h-[600px] cursor-pointer transform-gpu transition-transform duration-500 ease-out hover:-translate-y-1"
-                >
-                  {/* Image layer — single transform source (no double scaling) */}
-                  <div className="absolute inset-0 h-full w-full overflow-hidden">
-                    <Image
-                      src={s.gif}
-                      alt={`Service ${index + 1}`}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      loading="lazy"
-                      className="object-cover transform-gpu transition-transform duration-700 ease-out group-hover:scale-105"
-                    />
-
-                    {/* Single flat gradient overlay — no radial dot pattern */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30 transition-opacity duration-500 group-hover:from-black/95 group-hover:via-black/70" />
-                  </div>
-
-                  {/* Content */}
-                  <div className="relative h-full min-h-[400px] md:min-h-[500px] lg:min-h-[600px] flex flex-col justify-end p-8 md:p-10 lg:p-12 z-10">
-                    {/* Quote mark — static, no opacity transition cost */}
-                    <svg
-                      className="absolute top-8 left-8 md:top-10 md:left-10 opacity-80"
-                      width="60"
-                      height="60"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M9 7H5C3.89543 7 3 7.89543 3 9V15C3 16.1046 3.89543 17 5 17H7C8.10457 17 9 16.1046 9 15V9C9 7.89543 8.10457 7 7 7H9ZM21 7H17C15.8954 7 15 7.89543 15 9V15C15 16.1046 15.8954 17 17 17H19C20.1046 17 21 16.1046 21 15V9C21 7.89543 20.1046 7 19 7H21Z"
-                        fill="white"
-                      />
-                    </svg>
-
-                    <p className="text-lg md:text-xl lg:text-1xl text-white leading-relaxed font-medium mb-6 md:mb-8 max-w-lg">
-                      {s.desc}
-                    </p>
-
-                    <div className="flex items-center gap-3 text-white/80 transition-colors duration-300 group-hover:text-white">
-                      <ArrowUpRight
-                        className="w-5 h-5 md:w-6 md:h-6 transform-gpu transition-transform duration-300 group-hover:translate-x-1.5 group-hover:-translate-y-1.5"
-                        strokeWidth={2}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Border glow — cheap, no blur */}
-                  <div className="absolute inset-0 rounded-2xl border-2 border-transparent transition-colors duration-500 group-hover:border-white/20 pointer-events-none" />
-                </motion.div>
-              ))}
-            </motion.div>
-
-            {/* Location */}
-            <motion.div
-              variants={fadeUp}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.5 }}
-              className="mt-14 rounded-2xl border border-[var(--line)] bg-white p-8 md:p-10 max-w-3xl"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-2xl">📍</span>
-                <span className="font-[family-name:var(--font-display)] text-lg md:text-xl text-[var(--ink)]">
-                  Based in Bhubaneswar
-                </span>
-              </div>
-              <p className="text-[var(--ink-soft)] leading-relaxed text-sm md:text-base">
-                We work with startups, healthcare organizations, educational
-                institutions, real estate companies, manufacturers, service
-                providers, and growing brands across India. Our focus remains
-                the same regardless of industry — to deliver practical solutions
-                that solve real business challenges.
-              </p>
-            </motion.div>
-          </div>
+          {/* <CardsHover /> */}
+          <OurValues />
         </section>
         {/* faq */}
         <AboutFAQ />

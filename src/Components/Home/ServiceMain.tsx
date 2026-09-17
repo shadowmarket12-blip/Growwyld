@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
@@ -27,7 +26,6 @@ import "@/Components/Home/style/services-section.css";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
-  ScrollTrigger.config({ ignoreMobileResize: true });
 }
 
 const BRAND = {
@@ -184,228 +182,58 @@ const CATEGORIES: Category[] = [
   },
 ];
 
-/* -------------------------------------------------------------------- */
-/*  Easing vocabulary                                                    */
-/* -------------------------------------------------------------------- */
-
-const EASE = "expo.out";
+const EASE = "power2.out";
 const EASE_SOFT = "power2.out";
 const EASE_SPRING = "back.out(1.5)";
 
 /* -------------------------------------------------------------------- */
-/*  Lenis <-> GSAP wiring                                                */
-/* -------------------------------------------------------------------- */
-
-function useLenisGsap() {
-  useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.15,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-    });
-
-    const tick = (time: number) => {
-      lenis.raf(time * 1000);
-      ScrollTrigger.update();
-    };
-    gsap.ticker.add(tick);
-    gsap.ticker.lagSmoothing(500, 33);
-
-    const refresh = () => ScrollTrigger.refresh();
-    window.addEventListener("load", refresh);
-    const t = setTimeout(refresh, 300);
-
-    return () => {
-      gsap.ticker.remove(tick);
-      lenis.destroy();
-      window.removeEventListener("load", refresh);
-      clearTimeout(t);
-    };
-  }, []);
-}
-
-/* -------------------------------------------------------------------- */
-/*  Generic scroll-reveal hook                                           */
-/* -------------------------------------------------------------------- */
-
-function useReveal<T extends HTMLElement>(opts?: {
-  y?: number;
-  scale?: number;
-  duration?: number;
-  delay?: number;
-  ease?: string;
-  start?: string;
-  replay?: boolean;
-}) {
-  const ref = useRef<T | null>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const ctx = gsap.context(() => {
-      gsap.set(el, { autoAlpha: 0, y: opts?.y ?? 28, scale: opts?.scale ?? 1 });
-      gsap.to(el, {
-        autoAlpha: 1,
-        y: 0,
-        scale: 1,
-        duration: opts?.duration ?? 0.7,
-        delay: opts?.delay ?? 0,
-        ease: opts?.ease ?? EASE,
-        force3D: true,
-        scrollTrigger: {
-          trigger: el,
-          start: opts?.start ?? "top 88%",
-          end: "bottom 12%",
-          toggleActions: opts?.replay
-            ? "play reverse play reverse"
-            : "play none none none",
-        },
-      });
-    });
-    return () => ctx.revert();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return ref;
-}
-
-/* -------------------------------------------------------------------- */
-/*  Moving brand logo                                                    */
-/* -------------------------------------------------------------------- */
-
-function BrandMark({ size = 56 }: { size?: number }) {
-  const sceneRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    const el = sceneRef.current;
-    if (!el) return;
-    const isFine = window.matchMedia("(pointer: fine)").matches;
-    if (!isFine) return;
-
-    function handleMove(e: MouseEvent) {
-      if (rafRef.current) return;
-      rafRef.current = requestAnimationFrame(() => {
-        rafRef.current = null;
-        const rect = el!.getBoundingClientRect();
-        const px = (e.clientX - rect.left) / rect.width;
-        const py = (e.clientY - rect.top) / rect.height;
-        const rx = (py - 0.5) * -18;
-        const ry = (px - 0.5) * 18;
-        el!.style.setProperty("--tiltX", `${rx}deg`);
-        el!.style.setProperty("--tiltY", `${ry}deg`);
-      });
-    }
-    function handleLeave() {
-      el!.style.setProperty("--tiltX", "0deg");
-      el!.style.setProperty("--tiltY", "0deg");
-    }
-    el.addEventListener("mousemove", handleMove, { passive: true });
-    el.addEventListener("mouseleave", handleLeave);
-    return () => {
-      el.removeEventListener("mousemove", handleMove);
-      el.removeEventListener("mouseleave", handleLeave);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    const el = sceneRef.current;
-    if (!el) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        el,
-        { autoAlpha: 0, scale: 0.7, rotate: -8 },
-        {
-          autoAlpha: 1,
-          scale: 1,
-          rotate: 0,
-          duration: 0.7,
-          ease: EASE,
-          scrollTrigger: { trigger: el, start: "top 95%", once: true },
-        },
-      );
-    });
-    return () => ctx.revert();
-  }, []);
-
-  return (
-    <div
-      ref={sceneRef}
-      className="brand-logo-scene relative shrink-0"
-      style={{ width: size, height: size }}
-    >
-      <span className="brand-logo-glow" aria-hidden="true" />
-      <div className="brand-logo-float relative h-full w-full">
-        <Image
-          src={BRAND.logo}
-          alt={`${BRAND.name} logo`}
-          fill
-          sizes="66px"
-          className="object-contain"
-          priority
-        />
-      </div>
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------------- */
-/*  Card tilt                                                            */
+/*  Simplified card tilt (no scroll animations)                          */
 /* -------------------------------------------------------------------- */
 
 function useCardTilt() {
   const cardRef = useRef<HTMLDivElement>(null);
-  const imgWrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const card = cardRef.current;
     if (!card) return;
 
-    const quickRotX = gsap.quickTo(card, "rotateX", {
-      duration: 0.6,
-      ease: "power3.out",
-    });
-    const quickRotY = gsap.quickTo(card, "rotateY", {
-      duration: 0.6,
-      ease: "power3.out",
-    });
-    const quickY = gsap.quickTo(card, "y", {
-      duration: 0.45,
-      ease: "power3.out",
-    });
-
     const isFine = window.matchMedia("(pointer: fine)").matches;
     if (!isFine) return;
 
+    const quickRotX = gsap.quickTo(card, "rotateX", {
+      duration: 0.4,
+      ease: "power2.out",
+    });
+    const quickRotY = gsap.quickTo(card, "rotateY", {
+      duration: 0.4,
+      ease: "power2.out",
+    });
+
     let hovering = false;
+    let rafId: number | null = null;
 
     function handleEnter() {
       hovering = true;
       card!.style.willChange = "transform";
-      quickY(-10);
     }
 
     function handleMove(e: MouseEvent) {
-      if (!hovering) return;
-      const rect = card!.getBoundingClientRect();
-      const px = (e.clientX - rect.left) / rect.width;
-      const py = (e.clientY - rect.top) / rect.height;
-
-      quickRotX(6 - py * 12);
-      quickRotY(px * 12 - 6);
-
-      card!.style.setProperty("--mx", `${px * 100}%`);
-      card!.style.setProperty("--my", `${py * 100}%`);
-      card!.style.setProperty("--angle", `${px * 360}deg`);
+      if (!hovering || rafId) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        const rect = card!.getBoundingClientRect();
+        const px = (e.clientX - rect.left) / rect.width;
+        const py = (e.clientY - rect.top) / rect.height;
+        quickRotX(4 - py * 8);
+        quickRotY(px * 8 - 4);
+      });
     }
 
     function handleLeave() {
       hovering = false;
       quickRotX(0);
       quickRotY(0);
-      quickY(0);
-      gsap.delayedCall(0.5, () => {
+      gsap.delayedCall(0.3, () => {
         if (!hovering) card!.style.willChange = "auto";
       });
     }
@@ -417,14 +245,15 @@ function useCardTilt() {
       card.removeEventListener("mouseenter", handleEnter);
       card.removeEventListener("mousemove", handleMove);
       card.removeEventListener("mouseleave", handleLeave);
+      if (rafId) cancelAnimationFrame(rafId);
     };
   }, []);
 
-  return { cardRef, imgWrapRef };
+  return { cardRef };
 }
 
 /* -------------------------------------------------------------------- */
-/*  Premium 3D Card                                                      */
+/*  Premium 3D Card (no entrance animations)                             */
 /* -------------------------------------------------------------------- */
 
 function CategoryCard({
@@ -440,7 +269,7 @@ function CategoryCard({
   isMobileActive: boolean;
   onOpen: (i: number) => void;
 }) {
-  const { cardRef, imgWrapRef } = useCardTilt();
+  const { cardRef } = useCardTilt();
 
   return (
     <div
@@ -462,19 +291,19 @@ function CategoryCard({
           hover:border-[#22C55E] hover:shadow-[0_45px_100px_-24px_rgba(17,62,110,0.35)]
           ${isMobileActive ? "block" : "hidden"} lg:block`}
       style={{
-        perspective: 1400,
+        perspective: 1200,
         transformStyle: "preserve-3d",
         willChange: "auto",
         boxShadow: "0 20px 55px -25px rgba(17,62,110,0.18)",
       }}
     >
       <div className="pointer-events-none absolute inset-0 z-[5] overflow-hidden rounded-[36px] opacity-0 transition-opacity duration-700 group-hover:opacity-100">
-        {[...Array(6)].map((_, p) => (
+        {[...Array(4)].map((_, p) => (
           <span
             key={p}
             className="card-particle"
             style={{
-              left: `${12 + p * 15}%`,
+              left: `${15 + p * 20}%`,
               animationDelay: `${p * 0.35}s`,
               animationDuration: `${3.5 + (p % 3)}s`,
             }}
@@ -486,13 +315,14 @@ function CategoryCard({
         className="relative h-60 w-full overflow-hidden sm:h-68 group/image"
         style={{ transform: "translateZ(10px)" }}
       >
-        <div ref={imgWrapRef} className="absolute inset-0">
+        <div className="absolute inset-0">
           <Image
             src={cat.image}
             alt={cat.title}
             fill
             sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 50vw, 25vw"
             className="object-cover"
+            loading="lazy"
           />
         </div>
 
@@ -578,6 +408,7 @@ function GalleryMosaic({ images, title }: { images: string[]; title: string }) {
         duration: 0.4,
         ease: EASE,
         stagger: 0.05,
+        clearProps: "all",
       },
     );
   }, [images]);
@@ -626,7 +457,6 @@ function GalleryMosaic({ images, title }: { images: string[]; title: string }) {
       { opacity: 0 },
       { opacity: 1, duration: 0.25, ease: EASE_SOFT },
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lightboxMounted]);
 
   useEffect(() => {
@@ -636,9 +466,8 @@ function GalleryMosaic({ images, title }: { images: string[]; title: string }) {
     gsap.fromTo(
       stage,
       { opacity: 0, scale: 1.06 },
-      { opacity: 1, scale: 1, duration: 0.35, ease: EASE },
+      { opacity: 1, scale: 1, duration: 0.35, ease: EASE, clearProps: "all" },
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lightboxIndex]);
 
   useEffect(() => {
@@ -695,6 +524,7 @@ function GalleryMosaic({ images, title }: { images: string[]; title: string }) {
                 fill
                 sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 220px"
                 className="object-cover"
+                loading="lazy"
               />
             </div>
 
@@ -799,6 +629,7 @@ function GalleryMosaic({ images, title }: { images: string[]; title: string }) {
                     fill
                     sizes="64px"
                     className="object-cover"
+                    loading="lazy"
                   />
                 </button>
               ))}
@@ -811,7 +642,7 @@ function GalleryMosaic({ images, title }: { images: string[]; title: string }) {
 }
 
 /* -------------------------------------------------------------------- */
-/*  Main section                                                         */
+/*  Main section (no scroll lag, no card entrance animations)           */
 /* -------------------------------------------------------------------- */
 
 export default function ServicesSection() {
@@ -840,6 +671,7 @@ export default function ServicesSection() {
       scale: 0.97,
       duration: 0.28,
       ease: EASE_SOFT,
+      clearProps: "all",
     });
     gsap.to(backdrop, {
       opacity: 0,
@@ -877,9 +709,15 @@ export default function ServicesSection() {
     gsap.fromTo(
       card,
       { opacity: 0, y: 24, scale: 0.96 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: EASE_SPRING },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.55,
+        ease: EASE_SPRING,
+        clearProps: "transform",
+      },
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modalMounted, modalIndex]);
 
   useEffect(() => {
@@ -902,78 +740,6 @@ export default function ServicesSection() {
 
   const registerRef = useCallback((el: HTMLDivElement | null, i: number) => {
     cardRefs.current[i] = el;
-  }, []);
-
-  useLenisGsap();
-
-  useEffect(() => {
-    const mm = gsap.matchMedia();
-
-    mm.add({ isDesktop: "(min-width: 1024px)" }, (context) => {
-      const { isDesktop } = context.conditions as { isDesktop: boolean };
-      const cards = cardRefs.current.filter(Boolean) as HTMLElement[];
-      if (!cards.length) return;
-
-      if (!isDesktop) {
-        gsap.set(cards, {
-          autoAlpha: 1,
-          x: 0,
-          rotateX: 0,
-          rotateY: 0,
-          scale: 1,
-          clearProps: "willChange",
-        });
-        return;
-      }
-
-      const tweens = cards.map((card, i) => {
-        const fromLeft = i % 2 === 0;
-
-        return gsap.fromTo(
-          card,
-          {
-            autoAlpha: 0,
-            x: fromLeft ? -60 : 60,
-            rotateY: fromLeft ? -20 : 20,
-            rotateX: 3,
-            scale: 0.94,
-          },
-          {
-            autoAlpha: 1,
-            x: 0,
-            rotateY: 0,
-            rotateX: 0,
-            scale: 1,
-            duration: 0.85,
-            ease: EASE,
-            force3D: true,
-            paused: true,
-            scrollTrigger: {
-              trigger: card,
-              start: "top 90%",
-              end: "bottom 10%",
-              toggleActions: "play reverse play reverse",
-              onToggle: (self) => {
-                card.style.willChange = self.isActive
-                  ? "transform, opacity"
-                  : "auto";
-              },
-            },
-          },
-        );
-      });
-
-      return () => {
-        tweens.forEach((tw) => tw.scrollTrigger?.kill());
-      };
-    });
-
-    const t = setTimeout(() => ScrollTrigger.refresh(), 300);
-
-    return () => {
-      mm.revert();
-      clearTimeout(t);
-    };
   }, []);
 
   useEffect(() => {
@@ -1032,17 +798,16 @@ export default function ServicesSection() {
     gsap.fromTo(
       chips,
       { autoAlpha: 0, y: 6 },
-      { autoAlpha: 1, y: 0, duration: 0.25, ease: EASE, stagger: 0.03 },
+      {
+        autoAlpha: 1,
+        y: 0,
+        duration: 0.25,
+        ease: EASE,
+        stagger: 0.03,
+        clearProps: "all",
+      },
     );
   }, [modalMounted, modalIndex]);
-
-  const brandBarRef = useReveal<HTMLDivElement>({ y: -16, duration: 0.6 });
-  const headingRef = useReveal<HTMLDivElement>({ y: 28, duration: 0.65 });
-  const tabsRef = useReveal<HTMLDivElement>({
-    y: 12,
-    duration: 0.5,
-    delay: 0.1,
-  });
 
   return (
     <section
@@ -1059,13 +824,18 @@ export default function ServicesSection() {
       </div>
 
       <div className="relative mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16">
-        <div
-          ref={brandBarRef}
-          style={{ opacity: 0 }}
-          className="mb-16 flex items-center justify-between border-b border-[#113E6E]/15 pb-8 sm:mb-10"
-        >
+        <div className="mb-16 flex items-center justify-between border-b border-[#113E6E]/15 pb-8 sm:mb-10">
           <div className="flex items-center gap-4">
-            <BrandMark />
+            <div className="relative h-14 w-14 shrink-0">
+              <Image
+                src={BRAND.logo}
+                alt={`${BRAND.name} logo`}
+                fill
+                sizes="56px"
+                className="object-contain"
+                priority
+              />
+            </div>
             <div className="leading-tight">
               <div className="text-[1.4rem] tracking-tight text-[#113E6E] sm:text-2xl font-medium">
                 {BRAND.name}
@@ -1074,11 +844,7 @@ export default function ServicesSection() {
           </div>
         </div>
 
-        <div
-          ref={headingRef}
-          style={{ opacity: 0 }}
-          className="grid grid-cols-1 items-end gap-5 lg:grid-cols-[1fr_auto]"
-        >
+        <div className="grid grid-cols-1 items-end gap-5 lg:grid-cols-[1fr_auto]">
           <div>
             <h2 className="mt-2 max-w-2xl text-3xl md:text-4xl lg:text-5xl font-medium text-black leading-tight">
               Solutions designed around your business goals
@@ -1105,11 +871,7 @@ export default function ServicesSection() {
           </Link>
         </div>
 
-        <div
-          ref={tabsRef}
-          style={{ opacity: 0 }}
-          className="mt-14 -mx-6 flex gap-x-3 gap-y-3 overflow-x-auto px-6 pb-3 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
-        >
+        <div className="mt-14 -mx-6 flex gap-x-3 gap-y-3 overflow-x-auto px-6 pb-3 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
           {CATEGORIES.map((cat, i) => (
             <button
               key={cat.title}
@@ -1117,8 +879,8 @@ export default function ServicesSection() {
               aria-pressed={active === i}
               className={`group relative shrink-0 whitespace-nowrap rounded-full border px-5 py-2.5 text-[13px] font-medium transition-all duration-400 ${
                 active === i
-                  ? "border-transparent bg-gradient-to-r from-[#113E6E] via-[#1a4a7a] to-[#22C55E] text-white shadow-[0_10px_30px_-12px_rgba(17,62,110,0.5)]"
-                  : "border-[#113E6E]/15 bg-[#EAF8FC] text-[#113E6E]/80 hover:border-[#22C55E]/60 hover:text-[#113E6E] hover:bg-[#D6F1F8]"
+                  ? "border-transparent bg-[#113E6E] text-white shadow-[0_10px_30px_-12px_rgba(17,62,110,0.5)]"
+                  : "border-[#113E6E]/15 bg-[#EAF8FC] text-[#113E6E]/80 hover:border-[#113E6E]/60 hover:text-[#113E6E] hover:bg-[#D6F1F8]"
               }`}
             >
               <span className="flex items-center gap-2">
@@ -1133,11 +895,10 @@ export default function ServicesSection() {
           ))}
         </div>
 
-        {/* CHANGED: grid-cols from xl:grid-cols-3 to xl:grid-cols-4 for 4 cards on desktop */}
         <div
           ref={gridRef}
           className="mt-12 grid grid-cols-1 gap-7 sm:gap-8 md:grid-cols-2 xl:grid-cols-4"
-          style={{ perspective: 1600 }}
+          style={{ perspective: 1200 }}
         >
           {CATEGORIES.map((cat, i) => (
             <CategoryCard

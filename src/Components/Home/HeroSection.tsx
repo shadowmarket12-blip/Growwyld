@@ -493,7 +493,7 @@ export default function HeroSection() {
                     >
                       <span
                         className={
-                          i === 1 ? "text-[#00B7C3]" : "text-[#0D1B2A]"
+                          i === 1 ? "text-[##113E6E]" : "text-[#0D1B2A]"
                         }
                       >
                         {word}
@@ -501,7 +501,7 @@ export default function HeroSection() {
                     </motion.span>
                   ))}
                   <motion.span
-                    className="block text-2xl md:text-3xl lg:text-4xl font-medium text-gray-600 mt-2"
+                    className="block text-2xl md:text-3xl lg:text-4xl font-medium text-[#000000] mt-2"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.5, duration: 0.5 }}

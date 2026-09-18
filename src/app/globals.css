@@ -44,3 +44,32 @@ input,
 textarea {
   @apply transition-all duration-300;
 }
+
+/* 404 Page animations */
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.duration-7000 {
+  animation-duration: 7s;
+}
+
+.duration-8000 {
+  animation-duration: 8s;
+}
+
+.duration-10000 {
+  animation-duration: 10s;
+}
+
+/* Ensure smooth animations */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

@@ -2,7 +2,8 @@
 
 import React, { useEffect, useMemo, useCallback, useState } from "react";
 import { ChevronRight } from "lucide-react";
-import Lenis from "@studio-freight/lenis";
+// import Lenis from "@studio-freight/lenis";
+import Lenis from "lenis";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import LearnMoreButton from "../Aboutus/Bsix";

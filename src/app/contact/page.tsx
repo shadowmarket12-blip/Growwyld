@@ -16,6 +16,7 @@ import {
   ArrowUpRight,
   CheckCircle2,
   Building2,
+  type LucideIcon,
 } from "lucide-react";
 import ContactHero from "@/Components/Contactus/ContactususHero";
 import ContactUsForm from "@/Components/Contactus/ContactUsForm";
@@ -34,9 +35,32 @@ const TOKENS = {
 };
 
 /* ------------------------------------------------------------------ */
+/* Types                                                              */
+/* ------------------------------------------------------------------ */
+interface ContactCardData {
+  icon: LucideIcon;
+  label: string;
+  primary: string;
+  secondary: string;
+  href: string;
+}
+
+interface SectionHeadingProps {
+  kicker?: string;
+  title: string;
+  sub?: string;
+  align?: "left" | "center";
+}
+
+interface ContactCardProps {
+  card: ContactCardData;
+  index: number;
+}
+
+/* ------------------------------------------------------------------ */
 /* Static content                                                     */
 /* ------------------------------------------------------------------ */
-const CONTACT_CARDS = [
+const CONTACT_CARDS: ContactCardData[] = [
   {
     icon: Phone,
     label: "Call us",
@@ -104,7 +128,12 @@ const staggerParent = {
 /* Small building blocks                                              */
 /* ------------------------------------------------------------------ */
 
-function SectionHeading({ kicker, title, sub, align = "left" }) {
+function SectionHeading({
+  kicker,
+  title,
+  sub,
+  align = "left",
+}: SectionHeadingProps) {
   return (
     <div className={align === "center" ? "text-center" : "text-left"}>
       {kicker && (
@@ -133,7 +162,7 @@ function SectionHeading({ kicker, title, sub, align = "left" }) {
   );
 }
 
-function ContactCard({ card, index }) {
+function ContactCard({ card, index }: ContactCardProps) {
   const Icon = card.icon;
   return (
     <motion.a
@@ -142,7 +171,12 @@ function ContactCard({ card, index }) {
       whileHover={{ y: -4 }}
       transition={{ type: "spring", stiffness: 300, damping: 22 }}
       className="group relative flex flex-col gap-4 rounded-2xl border bg-white p-6 sm:p-7 transition-shadow duration-300 hover:shadow-[0_20px_45px_-20px_rgba(20,42,84,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-      style={{ borderColor: TOKENS.line, "--tw-ring-color": TOKENS.blue }}
+      style={
+        {
+          borderColor: TOKENS.line,
+          "--tw-ring-color": TOKENS.blue,
+        } as React.CSSProperties
+      }
     >
       <span
         className="inline-flex h-11 w-11 items-center justify-center rounded-xl transition-transform duration-300 group-hover:-translate-y-0.5"
@@ -181,7 +215,7 @@ function ContactCard({ card, index }) {
 /* ------------------------------------------------------------------ */
 export default function ContactPage() {
   const reduceMotion = useReducedMotion();
-  const heroRef = useRef(null);
+  const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],

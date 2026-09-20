@@ -7,51 +7,6 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import LearnMoreButton from "../Aboutus/Bsix";
 
-// Text Split Animation Component (word-by-word reveal)
-const SplitText = ({ text, className, delay = 0 }) => {
-  const words = text.split(" ");
-
-  const container = {
-    hidden: { opacity: 0 },
-    visible: (custom) => ({
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: delay + custom * 0.05,
-      },
-    }),
-  };
-
-  const word = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 25,
-      },
-    },
-  };
-
-  return (
-    <motion.div
-      className={className}
-      variants={container}
-      initial="hidden"
-      animate="visible"
-      custom={0}
-    >
-      {words.map((word, index) => (
-        <motion.span key={index} variants={word} className="inline-block mr-2">
-          {word}
-        </motion.span>
-      ))}
-    </motion.div>
-  );
-};
-
 // 3D Service Circle Component (Optimized)
 const ServiceCircle = () => {
   const [isHovered, setIsHovered] = useState(false);
@@ -430,19 +385,25 @@ export default function HeroSection() {
             transition={{ duration: 0.6, delay: 0.1 }}
           >
             <div className="space-y-3">
-              {/* Main Heading with Split Text Animation */}
-              <SplitText
-                text="IT Services Company in Odisha"
+              {/* Main Heading - normal text */}
+              <motion.h1
                 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight"
-                delay={0.1}
-              />
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+              >
+                IT Services Company in Odisha
+              </motion.h1>
 
-              {/* Gradient Heading with Split Text Animation */}
-              <SplitText
-                text="Helping Businesses Grow Online"
+              {/* Gradient Heading - normal text */}
+              <motion.h2
                 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-teal-600 bg-clip-text text-transparent leading-tight"
-                delay={0.3}
-              />
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
+                Helping Businesses Grow Online
+              </motion.h2>
             </div>
 
             {/* Description with fade animation */}

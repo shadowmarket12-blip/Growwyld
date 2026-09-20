@@ -44,7 +44,7 @@ const socialLinks = [
   { icon: FaFacebookF, href: "https://facebook.com/" },
 ];
 
-const WHATSAPP_NUMBER = "919876543210";
+const WHATSAPP_NUMBER = "917008308543";
 
 /* ─── Three.js Background ───────────────────────────────────────────────── */
 function FooterBackground() {
@@ -470,10 +470,10 @@ export default function Footer() {
             <div className="space-y-5 text-white">
               <div className="flex items-center gap-3">
                 <HiOutlineMail className="shrink-0 text-xl text-white" />
-                hello@growwyld.com
+                growwyldtech@gmail.com
               </div>
               <div className="text-white font-poppins">
-                Bengaluru, Karnataka
+                Nayapalli, Bhubaneswar, Odisha
               </div>
             </div>
 

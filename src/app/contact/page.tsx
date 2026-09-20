@@ -64,22 +64,22 @@ const CONTACT_CARDS: ContactCardData[] = [
   {
     icon: Phone,
     label: "Call us",
-    primary: "+1 (512) 884-0192",
+    primary: "+91 7008308543",
     secondary: "Mon–Fri, 8:00–19:00 CST",
-    href: "tel:+15128840192",
+    href: "tel:+91 7008308543",
   },
   {
     icon: Mail,
     label: "Email us",
-    primary: "hello@northstack.io",
+    primary: "growwyldtech@gmail.com",
     secondary: "We reply within one business day",
-    href: "mailto:hello@northstack.io",
+    href: "mailto:growwyldtech@gmail.com",
   },
   {
     icon: Building2,
     label: "Visit headquarters",
-    primary: "400 Meridian Ave, Suite 900",
-    secondary: "Austin, TX 78701",
+    primary: "Nayapalli, Bhubaneswar, Odisha",
+    secondary: "",
     href: "#",
   },
   {
@@ -106,7 +106,10 @@ const heroItem = {
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+    transition: {
+      duration: 0.6,
+      ease: [0.16, 1, 0.3, 1] as any,
+    },
   },
 };
 
@@ -115,7 +118,10 @@ const fadeUp = {
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
+    transition: {
+      duration: 0.55,
+      ease: [0.16, 1, 0.3, 1] as any,
+    },
   },
 };
 

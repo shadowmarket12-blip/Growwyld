@@ -48,8 +48,8 @@ const WHATSAPP_NUMBER = "917008308543";
 
 /* ─── Three.js Background ───────────────────────────────────────────────── */
 function FooterBackground() {
-  const mountRef = useRef(null);
-  const mouseRef = useRef({ x: 0, y: 0 });
+  const mountRef = useRef<HTMLDivElement>(null);
+  const mouseRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   useEffect(() => {
     const el = mountRef.current;
@@ -92,7 +92,7 @@ function FooterBackground() {
       opacity: 0.05,
     });
 
-    const shapes = [];
+    const shapes: THREE.Group[] = [];
     // Spread shapes across entire footer - left, right, center all areas
     for (let i = 0; i < 45; i++) {
       const geo = geos[i % geos.length];
@@ -272,7 +272,7 @@ function FooterBackground() {
     });
 
     /* — Mouse parallax — */
-    const onMouseMove = (e) => {
+    const onMouseMove = (e: MouseEvent) => {
       mouseRef.current = {
         x: (e.clientX / window.innerWidth - 0.5) * 2,
         y: (e.clientY / window.innerHeight - 0.5) * 2,
@@ -282,6 +282,7 @@ function FooterBackground() {
 
     /* — Resize — */
     const onResize = () => {
+      if (!el) return;
       const width = el.clientWidth;
       const height = el.clientHeight;
       camera.aspect = width / height;
@@ -291,7 +292,7 @@ function FooterBackground() {
     window.addEventListener("resize", onResize);
 
     /* — Animation loop — */
-    let rafId;
+    let rafId: number;
     const clock = new THREE.Clock();
     const animate = () => {
       rafId = requestAnimationFrame(animate);
@@ -345,7 +346,12 @@ function FooterBackground() {
 }
 
 /* ─── Simple Link without Hover Effects ─────────────────────────────────── */
-function SimpleLink({ name, href }) {
+interface SimpleLinkProps {
+  name: string;
+  href: string;
+}
+
+function SimpleLink({ name, href }: SimpleLinkProps) {
   return (
     <li>
       <Link href={href} className="text-white duration-200 inline-block py-1 ">
@@ -357,7 +363,7 @@ function SimpleLink({ name, href }) {
 
 /* ─── Footer ────────────────────────────────────────────────────────────── */
 export default function Footer() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState<string>("");
 
   const handleSubscribe = () => {
     if (!email.trim()) {

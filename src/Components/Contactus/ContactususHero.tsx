@@ -8,6 +8,7 @@ import {
   useReducedMotion,
   useMotionValue,
   useSpring,
+  Variants,
 } from "framer-motion";
 import { ArrowRight, Phone, PhoneCall } from "lucide-react";
 
@@ -22,17 +23,25 @@ const TOKENS = {
   accentGreen: "#22C55E",
 };
 
-const heroContainer = {
+const heroContainer: Variants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.09, delayChildren: 0.05 } },
+  show: {
+    transition: {
+      staggerChildren: 0.09,
+      delayChildren: 0.05,
+    },
+  },
 };
 
-const heroItem = {
+const heroItem: Variants = {
   hidden: { opacity: 0, y: 18 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+    transition: {
+      duration: 0.6,
+      ease: "easeOut",
+    },
   },
 };
 
@@ -149,7 +158,11 @@ export default function ContactHero() {
         <motion.div
           initial={{ opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          transition={{
+            duration: 0.8,
+            delay: 0.2,
+            ease: "easeOut",
+          }}
           className="relative flex items-center justify-center"
         >
           <div
@@ -175,7 +188,12 @@ export default function ContactHero() {
    - Ambient glow: radial-gradient, not a blur filter, so it costs
      nothing to repaint under a moving 3D transform.
    ============================================================ */
-function ContactCallGraphic({ reduceMotion }: { reduceMotion: boolean }) {
+
+interface ContactCallGraphicProps {
+  reduceMotion: boolean;
+}
+
+function ContactCallGraphic({ reduceMotion }: ContactCallGraphicProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
 
   const rotateX = useMotionValue(0);

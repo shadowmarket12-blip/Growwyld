@@ -20,80 +20,12 @@ import {
 import LearnMoreButton from "../Aboutus/Bsix";
 
 // ---------------------------------------------------------------------------
-// PERFORMANCE TIPS: Debounce function for mouse move
-// ---------------------------------------------------------------------------
-const useDebounce = (callback, delay) => {
-  const timeoutRef = useRef(null);
-
-  return useCallback(
-    (...args) => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => callback(...args), delay);
-    },
-    [callback, delay],
-  );
-};
-
-// ---------------------------------------------------------------------------
-// Premium heading animation — optimized 3D letter flip-up reveal
-// ---------------------------------------------------------------------------
-const PremiumHeading = React.memo(
-  ({ text, className, delay = 0, gradient = false }) => {
-    const letters = text.split("");
-
-    const container = {
-      hidden: {},
-      visible: {
-        transition: { staggerChildren: 0.025, delayChildren: delay },
-      },
-    };
-
-    const letter = {
-      hidden: { opacity: 0, y: 30, rotateX: 60 },
-      visible: {
-        opacity: 1,
-        y: 0,
-        rotateX: 0,
-        transition: {
-          type: "spring",
-          stiffness: 300,
-          damping: 25,
-          mass: 0.8,
-        },
-      },
-    };
-
-    return (
-      <motion.div
-        className={`${className} ${gradient ? "premium-sheen" : ""}`}
-        style={{ perspective: 600, display: "flex", flexWrap: "wrap" }}
-        variants={container}
-        initial="hidden"
-        animate="visible"
-      >
-        {letters.map((ch, i) => (
-          <motion.span
-            key={i}
-            variants={letter}
-            style={{ display: "inline-block", transformStyle: "preserve-3d" }}
-          >
-            {ch === " " ? "\u00A0" : ch}
-          </motion.span>
-        ))}
-      </motion.div>
-    );
-  },
-);
-
-PremiumHeading.displayName = "PremiumHeading";
-
-// ---------------------------------------------------------------------------
 // Premium 3D Orbiting Service Circle — Optimized for Performance
 // ---------------------------------------------------------------------------
-const ServiceCircle = React.memo(() => {
-  const [isMounted, setIsMounted] = useState(false);
-  const containerRef = useRef(null);
-  const tiltTimeoutRef = useRef(null);
+const ServiceCircle = React.memo(function ServiceCircle() {
+  const [isMounted, setIsMounted] = useState<boolean>(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const tiltTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -130,7 +62,7 @@ const ServiceCircle = React.memo(() => {
   });
 
   const handleMouseMove = useCallback(
-    (e) => {
+    (e: React.MouseEvent<HTMLDivElement>) => {
       if (!containerRef.current) return;
 
       const rect = containerRef.current.getBoundingClientRect();
@@ -423,13 +355,13 @@ ServiceCircle.displayName = "ServiceCircle";
 // Main Hero Section Component — Optimized
 // ---------------------------------------------------------------------------
 export default function HeroSection() {
-  const [isMounted, setIsMounted] = useState(false);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // ✅ REMOVED LENIS - Using native smooth scroll instead
+  // Native smooth scroll (Lenis removed)
   useEffect(() => {
     if (typeof window !== "undefined") {
       document.documentElement.style.scrollBehavior = "smooth";
@@ -493,7 +425,7 @@ export default function HeroSection() {
                     >
                       <span
                         className={
-                          i === 1 ? "text-[##113E6E]" : "text-[#0D1B2A]"
+                          i === 1 ? "text-[#113E6E]" : "text-[#0D1B2A]"
                         }
                       >
                         {word}

@@ -1,33 +1,40 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import Lenis from "lenis";
 
-export default function LenisWrapper({ children }) {
-  const lenisRef = useRef(null);
+interface LenisWrapperProps {
+  children: ReactNode;
+}
+
+export default function LenisWrapper({ children }: LenisWrapperProps) {
+  const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      direction: "vertical",
-      smooth: true,
-      smoothTouch: false,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: "vertical",
+      smoothWheel: true,
       touchMultiplier: 2,
     });
 
     lenisRef.current = lenis;
 
-    function raf(time) {
+    let rafId = 0;
+
+    function raf(time: number) {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      rafId = requestAnimationFrame(raf);
     }
 
-    requestAnimationFrame(raf);
+    rafId = requestAnimationFrame(raf);
 
     // Cleanup
     return () => {
+      cancelAnimationFrame(rafId);
       lenis.destroy();
+      lenisRef.current = null;
     };
   }, []);
 

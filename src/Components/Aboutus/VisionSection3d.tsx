@@ -24,14 +24,27 @@ const inter = Inter({
   variable: "--font-body",
 });
 
+interface CardDimensions {
+  width?: string;
+  maxWidth?: string;
+  marginLeft?: string;
+  marginRight?: string;
+  marginTop?: string;
+}
+
+interface Position {
+  x: number;
+  y: number;
+}
+
 const VisionSection3D = () => {
-  const sectionRef = useRef(null);
-  const containerRef = useRef(null);
-  const [activeCard, setActiveCard] = useState(0);
-  const [showCards, setShowCards] = useState(false);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isTablet, setIsTablet] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [activeCard, setActiveCard] = useState<number>(0);
+  const [showCards, setShowCards] = useState<boolean>(false);
+  const [isAutoPlaying, setIsAutoPlaying] = useState<boolean>(true);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [isTablet, setIsTablet] = useState<boolean>(false);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -63,15 +76,16 @@ const VisionSection3D = () => {
   const mouseY = useMotionValue(0);
 
   const handleMouseMove = useCallback(
-    (e) => {
+    (e: React.MouseEvent<HTMLDivElement>) => {
       if (window.innerWidth < 1024) return; // Disable on mobile/tablet
+
       const rect = containerRef.current?.getBoundingClientRect();
-      if (rect) {
-        const x = (e.clientX - rect.left) / rect.width - 0.5;
-        const y = (e.clientY - rect.top) / rect.height - 0.5;
-        mouseX.set(x);
-        mouseY.set(y);
-      }
+      if (!rect) return; // Explicitly check for null/undefined
+
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      mouseX.set(x);
+      mouseY.set(y);
     },
     [mouseX, mouseY],
   );
@@ -87,7 +101,7 @@ const VisionSection3D = () => {
 
   // Show cards when section is in view
   useEffect(() => {
-    const unsubscribe = smoothProgress.on("change", (value) => {
+    const unsubscribe = smoothProgress.on("change", (value: number) => {
       if (value > 0.15 && value < 0.85) {
         setShowCards(true);
       } else {
@@ -108,7 +122,16 @@ const VisionSection3D = () => {
     return () => clearInterval(interval);
   }, [isAutoPlaying, showCards, isMobile, isTablet]);
 
-  const visionCards = [
+  interface VisionCard {
+    icon: string;
+    title: string;
+    desc: string;
+    color: string;
+    accentColor: string;
+    backgroundImage: string;
+  }
+
+  const visionCards: VisionCard[] = [
     {
       icon: "🎯",
       title: "The Vision",
@@ -139,7 +162,7 @@ const VisionSection3D = () => {
   ];
 
   // Calculate positions for circular layout (desktop only)
-  const getCircularPosition = (index, totalCards) => {
+  const getCircularPosition = (index: number, totalCards: number): Position => {
     const angleStep = (2 * Math.PI) / totalCards;
     const angle = index * angleStep - Math.PI / 2;
     const radius = 220;
@@ -152,7 +175,7 @@ const VisionSection3D = () => {
   };
 
   // Calculate positions for vertical layout (mobile/tablet)
-  const getVerticalPosition = (index) => {
+  const getVerticalPosition = (index: number): Position => {
     if (isMobile) {
       return { x: 0, y: index * 180 - 180 };
     } else if (isTablet) {
@@ -162,7 +185,7 @@ const VisionSection3D = () => {
   };
 
   // Responsive card dimensions
-  const getCardDimensions = () => {
+  const getCardDimensions = (): CardDimensions => {
     if (isMobile) {
       return {
         width: "90%",

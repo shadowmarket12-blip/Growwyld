@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo, useCallback, useState } from "react";
 import { ChevronRight } from "lucide-react";
-import Lenis from "lenis";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import LearnMoreButton from "../Aboutus/Bsix";
@@ -307,51 +306,11 @@ const ServiceCircle = () => {
 
 // Main Hero Section Component
 export default function HeroSection() {
-  const lenisRef = React.useRef(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  useEffect(() => {
-    if (!isMounted) return;
-
-    if (typeof window !== "undefined" && window.__lenisInstance) {
-      return;
-    }
-
-    const lenis = new Lenis({
-      duration: 1.1,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: "vertical",
-      gestureOrientation: "vertical",
-      smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 1.5,
-      infinite: false,
-    });
-
-    if (typeof window !== "undefined") {
-      window.__lenisInstance = lenis;
-    }
-    lenisRef.current = lenis;
-
-    let frameId = null;
-    function raf(time) {
-      lenis.raf(time);
-      frameId = requestAnimationFrame(raf);
-    }
-    frameId = requestAnimationFrame(raf);
-
-    return () => {
-      if (frameId) cancelAnimationFrame(frameId);
-      lenis.destroy();
-      if (typeof window !== "undefined") {
-        window.__lenisInstance = null;
-      }
-    };
-  }, [isMounted]);
 
   if (!isMounted) {
     return (

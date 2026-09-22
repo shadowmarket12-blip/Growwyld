@@ -377,7 +377,7 @@ export default function HeroSection() {
   if (!isMounted) {
     return (
       <div className="relative min-h-screen bg-white overflow-hidden">
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-40 pb-12 sm:pb-16 lg:pb-20">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-42 lg:pt-40 pb-12 sm:pb-16 lg:pb-20">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="space-y-6 sm:space-y-8 order-2 lg:order-1" />
             <div className="order-1 lg:order-2" />
@@ -410,7 +410,7 @@ export default function HeroSection() {
           <div className="space-y-6 sm:space-y-8 order-2 lg:order-1">
             <div className="space-y-3">
               <div className="space-y-4">
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight">
+                <h1 className="mt-5 text-sm sm:text-lg md:text-3xl lg:text-5xl font-medium text-black mb-3">
                   {["IT", "Services", "Company"].map((word, i) => (
                     <motion.span
                       key={word}

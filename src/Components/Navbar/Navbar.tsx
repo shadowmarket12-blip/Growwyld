@@ -93,14 +93,28 @@ export default function Navbar() {
 
   const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [drawerMounted, setDrawerMounted] = useState(false); // keeps drawer in DOM during close animation
+  const [drawerMounted, setDrawerMounted] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<DropdownKey>(null);
   const [mobileExpanded, setMobileExpanded] = useState<DropdownKey>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [isMobile, setIsMobile] = useState(false); // NEW: Track mobile viewport
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // ── Detect mobile viewport ──────────────────────────────────────────────
+  useEffect(() => {
+    if (!mounted) return;
+
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024); // Tailwind's lg breakpoint
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile, { passive: true });
+    return () => window.removeEventListener("resize", checkMobile);
+  }, [mounted]);
 
   // ── Entrance animation ──────────────────────────────────────────────────
   useEffect(() => {
@@ -143,7 +157,6 @@ export default function Navbar() {
       return;
     }
 
-    // closing: only animate out if it was actually mounted/open before
     if (!drawerMounted) return;
 
     const overlay = overlayRef.current;
@@ -161,7 +174,6 @@ export default function Navbar() {
       { opacity: 0, duration: 0.75, ease: "power2.inOut" },
       0.05,
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mobileOpen, mounted]);
 
   // Animate the drawer IN once it's mounted in the DOM
@@ -235,15 +247,22 @@ export default function Navbar() {
 
   const s = mounted && scrolled; // shorthand: "is scrolled"
 
+  // ── Responsive padding values ──────────────────────────────────────────
+  const headerPaddingY = isMobile ? (s ? "4px" : "8px") : s ? "1px" : "12px";
+  const headerPaddingX = isMobile ? (s ? "0px" : "8px") : s ? "0px" : "12px";
+  const topBarPaddingY = isMobile ? (s ? "6px" : "12px") : s ? "8px" : "16px";
+  const topBarPaddingX = isMobile ? (s ? "16px" : "12px") : s ? "48px" : "20px";
+  const minHeightNav = isMobile ? (s ? "48px" : "60px") : s ? "56px" : "70px";
+
   return (
     <header
       ref={navRef}
       className="fixed top-0 left-0 w-full z-50"
       style={{
-        paddingTop: s ? "0px" : "12px",
-        paddingLeft: s ? "0px" : "12px",
-        paddingRight: s ? "0px" : "12px",
-        transition: `padding-top ${DUR} ${EASE}, padding-left ${DUR} ${EASE}, padding-right ${DUR} ${EASE}`,
+        paddingTop: headerPaddingY,
+        paddingLeft: headerPaddingX,
+        paddingRight: headerPaddingX,
+        transition: `padding ${DUR} ${EASE}`,
       }}
     >
       <div
@@ -278,26 +297,25 @@ export default function Navbar() {
           <div
             className="flex items-center justify-between gap-4"
             style={{
-              paddingTop: s ? "12px" : "20px",
-              paddingBottom: s ? "12px" : "20px",
-              paddingLeft: s ? "48px" : "20px",
-              paddingRight: s ? "48px" : "20px",
-              transition: [
-                `padding-top    ${DUR} ${EASE}`,
-                `padding-bottom ${DUR} ${EASE}`,
-                `padding-left   ${DUR} ${EASE}`,
-                `padding-right  ${DUR} ${EASE}`,
-              ].join(", "),
+              paddingTop: topBarPaddingY,
+              paddingBottom: topBarPaddingY,
+              paddingLeft: topBarPaddingX,
+              paddingRight: topBarPaddingX,
+              transition: `padding ${DUR} ${EASE}`,
+              minHeight: minHeightNav,
             }}
           >
             {/* Logo */}
             <Link href="/" className="shrink-0 z-10">
               <Image
                 src="/logo.png"
-                width={130}
-                height={42}
+                width={isMobile ? (s ? 90 : 100) : s ? 110 : 130}
+                height={isMobile ? (s ? 28 : 32) : s ? 35 : 42}
                 alt="Company Logo"
                 priority
+                style={{
+                  transition: `all ${DUR} ${EASE}`,
+                }}
               />
             </Link>
 
@@ -495,11 +513,16 @@ export default function Navbar() {
               {/* ── Hamburger (mobile + tablet only) ── */}
               <button
                 onClick={() => setMobileOpen(true)}
-                className="lg:hidden relative flex items-center justify-center w-14 h-14  text-black  hover:scale-110 transition-all duration-300 active:scale-95"
+                className="lg:hidden relative flex items-center justify-center text-black hover:scale-110 transition-all duration-300 active:scale-95"
+                style={{
+                  width: isMobile ? (s ? "40px" : "44px") : "48px",
+                  height: isMobile ? (s ? "40px" : "44px") : "48px",
+                  transition: `all ${DUR} ${EASE}`,
+                }}
                 aria-label="Open menu"
                 aria-expanded={mobileOpen}
               >
-                <FaBarsProgress size={25} />
+                <FaBarsProgress size={isMobile ? (s ? 18 : 22) : 25} />
               </button>
             </div>
           </div>
@@ -539,13 +562,16 @@ export default function Navbar() {
             style={{ transform: "translateX(100%)" }}
           >
             {/* Drawer header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-black/10 shrink-0">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-black/10 shrink-0 sm:px-5">
               <Link href="/" onClick={closeDrawer} className="shrink-0">
                 <Image
                   src="/logo.png"
-                  width={120}
-                  height={34}
+                  width={isMobile ? 90 : 110}
+                  height={isMobile ? 28 : 34}
                   alt="Company Logo"
+                  style={{
+                    transition: `all ${DUR} ${EASE}`,
+                  }}
                 />
               </Link>
               <button
@@ -559,7 +585,7 @@ export default function Navbar() {
 
             {/* Drawer scrollable content */}
             <div
-              className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 flex flex-col gap-1 text-sm font-medium text-black"
+              className="flex-1 overflow-y-auto overscroll-contain px-3 py-4 flex flex-col gap-1 text-sm font-medium text-black sm:px-4"
               style={{
                 WebkitOverflowScrolling: "touch",
                 touchAction: "pan-y",
@@ -655,11 +681,11 @@ export default function Navbar() {
             </div>
 
             {/* Drawer footer CTA (sticky at bottom) */}
-            <div className="shrink-0 px-4 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-black/10">
+            <div className="shrink-0 px-3 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-black/10 sm:px-4">
               <Link
                 href="/contact"
                 onClick={closeDrawer}
-                className="flex items-center justify-center gap-2  py-3.5 text-white font-semibold shadow-lg shadow-green-500/20 hover:opacity-90 transition-opacity"
+                className="flex items-center justify-center gap-2 py-3.5 text-white font-semibold shadow-lg shadow-green-500/20 hover:opacity-90 transition-opacity"
               >
                 <GooeyButton />
               </Link>

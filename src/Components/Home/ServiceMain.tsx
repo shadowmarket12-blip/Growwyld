@@ -45,11 +45,11 @@ interface Category {
 const CATEGORIES: Category[] = [
   {
     title: "Web Development",
-    image: "/services/web-development.webp",
+    image: "/Services/web-development.webp",
     gallery: [
-      "/services/web-development.webp",
-      "/services/web-development-2.webp",
-      "/services/web-development-3.webp",
+      "/Services/web-development.webp",
+      "/Services/web-development-2.webp",
+      "/Services/web-development-3.webp",
     ],
     icon: <Globe className="h-4 w-4" />,
     services: [
@@ -64,10 +64,10 @@ const CATEGORIES: Category[] = [
   },
   {
     title: "Mobile App Development",
-    image: "/services/mobile-app-development.webp",
+    image: "/Services/mobile-app-development.webp",
     gallery: [
-      "/services/mobile-app-development.webp",
-      "/services/mobile-app-development-2.webp",
+      "/Services/mobile-app-development.webp",
+      "/Services/mobile-app-development-2.webp",
     ],
     icon: <Cpu className="h-4 w-4" />,
     services: [
@@ -81,10 +81,10 @@ const CATEGORIES: Category[] = [
   },
   {
     title: "E-commerce Solutions",
-    image: "/services/ecommerce-solutionweb.webp",
+    image: "/Services/ecommerce-solutionweb.webp",
     gallery: [
-      "/services/ecommerce-solutionweb.webp",
-      "/services/ecommerce-solutionweb-2.webp",
+      "/Services/ecommerce-solutionweb.webp",
+      "/Services/ecommerce-solutionweb-2.webp",
     ],
     icon: <Briefcase className="h-4 w-4" />,
     services: [
@@ -98,17 +98,17 @@ const CATEGORIES: Category[] = [
   },
   {
     title: "Cloud & DevOps",
-    image: "/services/Cloud-DevOps.webp",
+    image: "/Services/Cloud-DevOps.webp",
     icon: <Zap className="h-4 w-4" />,
     services: ["Docker & Kubernetes", "CI/CD Pipeline Setup"],
   },
   {
     title: "UI/UX Design",
-    image: "/services/UIUX-Design.webp",
+    image: "/Services/UIUX-Design.webp",
     gallery: [
-      "/services/UIUX-Design.webp",
-      "/services/UIUX-Design-2.webp",
-      "/services/UIUX-Design-3.webp",
+      "/Services/UIUX-Design.webp",
+      "/Services/UIUX-Design-2.webp",
+      "/Services/UIUX-Design-3.webp",
     ],
     icon: <Palette className="h-4 w-4" />,
     services: [
@@ -122,10 +122,10 @@ const CATEGORIES: Category[] = [
   },
   {
     title: "Digital Marketing",
-    image: "/services/Digital-Marketing.webp",
+    image: "/Services/Digital-Marketing.webp",
     gallery: [
-      "/services/Digital-Marketing.webp",
-      "/services/Digital-Marketing-2.webp",
+      "/Services/Digital-Marketing.webp",
+      "/Services/Digital-Marketing-2.webp",
     ],
     icon: <TrendingUp className="h-4 w-4" />,
     services: [
@@ -143,7 +143,7 @@ const CATEGORIES: Category[] = [
   },
   {
     title: "Data & Analytics",
-    image: "/services/Data-Analytics.webp",
+    image: "/Services/Data-Analytics.webp",
     icon: <BarChart3 className="h-4 w-4" />,
     services: [
       "Business Intelligence Solutions",
@@ -154,7 +154,7 @@ const CATEGORIES: Category[] = [
   },
   {
     title: "Enterprise Solutions",
-    image: "/services/Enterprise-solutions.webp",
+    image: "/Services/Enterprise-solutions.webp",
     icon: <Building2 className="h-4 w-4" />,
     services: [
       "ERP Development",
@@ -167,7 +167,7 @@ const CATEGORIES: Category[] = [
   },
   {
     title: "Business Applications",
-    image: "/services/Business-Applications.webp",
+    image: "/Services/Business-Applications.webp",
     icon: <Target className="h-4 w-4" />,
     services: [
       "HRMS Development",

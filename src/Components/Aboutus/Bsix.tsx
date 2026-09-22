@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React from "react";
 
 const LearnMoreButton = () => {
@@ -13,9 +14,11 @@ const LearnMoreButton = () => {
           <span className="absolute content-[''] -top-[0.29rem] right-[0.0625rem] w-2.5 h-2.5 border-t-2 border-r-2 border-white rotate-45" />
         </span>
       </span>
-      <span className="button-text absolute top-0 left-0 right-0 bottom-0 py-3 px-0 ml-7 text-[#282936] font-bold leading-relaxed text-center uppercase transition-all duration-500 ease-[cubic-bezier(0.65,0,0.076,1)] group-hover:text-white">
-        Contact Us
-      </span>
+      <Link href="/contact">
+        <span className="button-text absolute top-0 left-0 right-0 bottom-0 py-3 px-0 ml-7 text-[#282936] font-bold leading-relaxed text-center uppercase transition-all duration-500 ease-[cubic-bezier(0.65,0,0.076,1)] group-hover:text-white">
+          Contact Us
+        </span>
+      </Link>
     </button>
   );
 };

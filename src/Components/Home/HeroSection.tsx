@@ -410,7 +410,7 @@ export default function HeroSection() {
           <div className="space-y-6 sm:space-y-8 order-2 lg:order-1">
             <div className="space-y-3">
               <div className="space-y-4">
-                <h1 className="mt-5 text-sm sm:text-lg md:text-3xl lg:text-5xl font-medium text-black mb-3">
+                <h1 className="mt-5 text-2xl  md:text-3xl lg:text-5xl font-medium text-black mb-3">
                   {["IT", "Services", "Company"].map((word, i) => (
                     <motion.span
                       key={word}
@@ -423,22 +423,16 @@ export default function HeroSection() {
                         ease: [0.22, 1, 0.36, 1],
                       }}
                     >
-                      <span
-                        className={
-                          i === 1 ? "text-[#113E6E]" : "text-[#0D1B2A]"
-                        }
-                      >
-                        {word}
-                      </span>
+                      <span className="text-black">{word}</span>
                     </motion.span>
                   ))}
                   <motion.span
-                    className="block text-2xl md:text-3xl lg:text-4xl font-medium text-[#000000] mt-2"
+                    className="block text-2xl md:text-3xl lg:text-5xl font-medium text-[#000000] mt-2"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.5, duration: 0.5 }}
                   >
-                    in Odisha
+                    in Odisha Helping Businesses Grow Online
                   </motion.span>
                 </h1>
               </div>

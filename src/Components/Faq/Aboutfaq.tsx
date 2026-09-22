@@ -46,10 +46,6 @@ const faqs = [
     answer:
       "Absolutely. We work with startups, small businesses, and growing organizations looking for scalable technology and marketing solutions that fit their goals and budget.",
   },
-  {
-    question: "",
-    answer: "",
-  },
 ];
 
 export default function AboutFAQ() {

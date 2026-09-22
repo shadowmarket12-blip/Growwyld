@@ -156,11 +156,10 @@ const CTASection = () => {
                 Ready to Grow{" "}
                 <span className="relative inline-block">
                   <span className="relative z-10 text-black">
-                    Your Business
+                    Your Business ?
                   </span>
                   <span className="absolute -bottom-1 left-0 right-0 h-px  to-transparent" />
                 </span>
-                ?
               </h2>
             </div>
 
@@ -194,7 +193,7 @@ const CTASection = () => {
                 <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
                 <span className="relative flex items-center gap-4">
                   Talk to Our Experts
-                  <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#C9A464] transition-all duration-300 group-hover:bg-[#D4B06A] group-hover:rotate-45">
+                  <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[##22C55E] transition-all duration-300 group-hover:bg-[#D4B06A ] group-hover:rotate-45">
                     <ArrowRight className="h-4 w-4 text-white" />
                   </span>
                 </span>
@@ -202,11 +201,6 @@ const CTASection = () => {
             </div>
           </div>
 
-          {/* Right Side - Luxury Decorative Design */}
-          {/* 🔧 FIX: removed `hidden lg:block`, now shows on ALL screen sizes.
-              order-1 puts it at the top on mobile/tablet, lg:order-2 moves it to the
-              right side on desktop (unchanged from before). Sizing is also scaled
-              down responsively so it doesn't overwhelm small screens. */}
           <div
             ref={decorativeRef}
             className="order-1 lg:order-2 relative block"
@@ -253,7 +247,7 @@ const CTASection = () => {
 
                       {/* Replace with your actual logo path */}
                       <Image
-                        src="/Images/GT Transparent logo.png" // Change this to your logo path
+                        src="/Images/GT-Transparent-logo.png" // Change this to your logo path
                         alt="Growwyld Tech Logo"
                         width={300}
                         height={300}

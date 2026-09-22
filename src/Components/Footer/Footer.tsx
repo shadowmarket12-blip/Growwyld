@@ -16,7 +16,7 @@ import {
 } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { HiOutlineMail } from "react-icons/hi";
-
+import { TiLocation } from "react-icons/ti";
 const quickLinks = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },
@@ -478,7 +478,8 @@ export default function Footer() {
                 <HiOutlineMail className="shrink-0 text-xl text-white" />
                 growwyldtech@gmail.com
               </div>
-              <div className="text-white font-poppins">
+              <div className="text-white font-poppins flex items-center gap-3">
+                <TiLocation className="shrink-0 text-xl text-white" />
                 Nayapalli, Bhubaneswar, Odisha
               </div>
             </div>

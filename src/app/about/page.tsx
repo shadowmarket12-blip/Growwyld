@@ -783,9 +783,9 @@ const AboutPage = () => {
                     <GooeyButton />
                   </div>
                 </Link>
-                <button className="px-7 py-3.5 rounded-full border border-[var(--line)] text-sm md:text-base font-medium tracking-wide text-[var(--ink)] transition-colors duration-300 hover:border-[var(--accent)] hover:text-[var(--accent)]">
+                {/* <button className="px-7 py-3.5 rounded-full border border-[var(--line)] text-sm md:text-base font-medium tracking-wide text-[var(--ink)] transition-colors duration-300 hover:border-[var(--accent)] hover:text-[var(--accent)]">
                   Explore
-                </button>
+                </button> */}
               </motion.div>
             </div>
 
@@ -796,28 +796,28 @@ const AboutPage = () => {
         {/* ---------------------------------------------------------- */}
         {/* Founders                                                    */}
         {/* ---------------------------------------------------------- */}
-        <section className="px-6 md:px-12 py-20 md:py-28 border-t border-[var(--line)]">
+        <section className="px-6 md:px-12 py-10 md:py-18">
           {/* <ProfessionalsSection3D /> */}
         </section>
 
         {/* ---------------------------------------------------------- */}
         {/* Our Journey                                                 */}
         {/* ---------------------------------------------------------- */}
-        <section className="px-6 md:px-12 py-20 md:py-28 border-t border-[var(--line)]">
+        <section className="px-6 md:px-12 py-20 md:py-28 ">
           <VisionSection3D />
         </section>
 
         {/* ---------------------------------------------------------- */}
         {/* What makes us different                                    */}
         {/* ---------------------------------------------------------- */}
-        <section className="px-6 md:px-12 py-20 md:py-28 border-t border-[var(--line)]">
+        <section className="px-6 md:px-12 py-20 md:py-28 ">
           {/* <Serve /> */}
         </section>
 
         {/* ---------------------------------------------------------- */}
         {/*  Services — optimized                                       */}
         {/* ---------------------------------------------------------- */}
-        <section className="px-6 md:px-12 py-20 md:py-28 border-t border-[var(--line)]">
+        <section className="px-6 md:px-12 py-20 md:py-28 ">
           {/* <CardsHover /> */}
           <OurValues />
         </section>

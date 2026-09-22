@@ -20,7 +20,6 @@ import {
   Briefcase,
   TrendingUp,
   X,
-  ZoomIn,
 } from "lucide-react";
 import "@/Components/Home/style/services-section.css";
 
@@ -385,262 +384,6 @@ function CategoryCard({
   );
 }
 
-function GalleryMosaic({ images, title }: { images: string[]; title: string }) {
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const [lightboxMounted, setLightboxMounted] = useState(false);
-
-  const gridRef = useRef<HTMLDivElement>(null);
-  const backdropRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
-  const swipeStartX = useRef(0);
-
-  useEffect(() => {
-    const el = gridRef.current;
-    if (!el) return;
-    const tiles = el.querySelectorAll<HTMLElement>("[data-tile]");
-    gsap.fromTo(
-      tiles,
-      { autoAlpha: 0, y: 12, scale: 0.9 },
-      {
-        autoAlpha: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.4,
-        ease: EASE,
-        stagger: 0.05,
-        clearProps: "all",
-      },
-    );
-  }, [images]);
-
-  const openLightbox = (i: number) => setLightboxIndex(i);
-
-  const go = useCallback(
-    (dir: 1 | -1) => {
-      setLightboxIndex((prev) => {
-        if (prev === null) return prev;
-        return (prev + dir + images.length) % images.length;
-      });
-    },
-    [images.length],
-  );
-
-  const closeLightbox = useCallback(() => {
-    const backdrop = backdropRef.current;
-    if (!backdrop) {
-      setLightboxIndex(null);
-      setLightboxMounted(false);
-      return;
-    }
-    gsap.to(backdrop, {
-      opacity: 0,
-      duration: 0.22,
-      ease: EASE_SOFT,
-      onComplete: () => {
-        setLightboxIndex(null);
-        setLightboxMounted(false);
-      },
-    });
-  }, []);
-
-  useEffect(() => {
-    if (lightboxIndex === null) return;
-    setLightboxMounted(true);
-  }, [lightboxIndex]);
-
-  useEffect(() => {
-    if (!lightboxMounted) return;
-    const backdrop = backdropRef.current;
-    if (!backdrop) return;
-    gsap.fromTo(
-      backdrop,
-      { opacity: 0 },
-      { opacity: 1, duration: 0.25, ease: EASE_SOFT },
-    );
-  }, [lightboxMounted]);
-
-  useEffect(() => {
-    if (!lightboxMounted) return;
-    const stage = stageRef.current;
-    if (!stage) return;
-    gsap.fromTo(
-      stage,
-      { opacity: 0, scale: 1.06 },
-      { opacity: 1, scale: 1, duration: 0.35, ease: EASE, clearProps: "all" },
-    );
-  }, [lightboxIndex]);
-
-  useEffect(() => {
-    if (lightboxIndex === null) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeLightbox();
-      if (e.key === "ArrowRight") go(1);
-      if (e.key === "ArrowLeft") go(-1);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [lightboxIndex, go, closeLightbox]);
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    swipeStartX.current = e.clientX;
-  };
-  const handlePointerUp = (e: React.PointerEvent) => {
-    const dx = e.clientX - swipeStartX.current;
-    const threshold = 60;
-    if (dx < -threshold) go(1);
-    else if (dx > threshold) go(-1);
-  };
-
-  const bentoClass = (i: number) => {
-    const pattern = i % 5;
-    if (pattern === 0) return "col-span-2 row-span-2";
-    if (pattern === 2) return "col-span-2 row-span-1";
-    return "col-span-1 row-span-1";
-  };
-
-  return (
-    <>
-      <div
-        ref={gridRef}
-        className="grid auto-rows-[76px] grid-cols-3 gap-2 sm:auto-rows-[92px] sm:gap-2.5 md:auto-rows-[100px]"
-        role="list"
-        aria-label={`${title} image gallery`}
-      >
-        {images.map((src, i) => (
-          <button
-            key={src + i}
-            data-tile
-            role="listitem"
-            onClick={() => openLightbox(i)}
-            style={{ opacity: 0 }}
-            className={`group/tile relative overflow-hidden rounded-xl bg-[#0d2f52] transition-transform duration-200 ease-out hover:scale-[0.97] active:scale-[0.94] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#22C55E] ${
-              images.length > 2 ? bentoClass(i) : "col-span-1 row-span-1"
-            }`}
-          >
-            <div className="absolute inset-0 transition-transform duration-500 ease-out group-hover/tile:scale-[1.12] group-hover/tile:rotate-1">
-              <Image
-                src={src}
-                alt={`${title} image ${i + 1}`}
-                fill
-                sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 220px"
-                className="object-cover"
-                loading="lazy"
-              />
-            </div>
-
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[#113E6E]/0 transition-colors duration-300 group-hover/tile:bg-[#113E6E]/45">
-              <span className="flex h-8 w-8 scale-50 items-center justify-center rounded-full bg-white/90 text-[#113E6E] opacity-0 shadow-lg transition-all duration-300 group-hover/tile:scale-100 group-hover/tile:opacity-100">
-                <ZoomIn size={14} strokeWidth={2} />
-              </span>
-            </div>
-
-            <span className="pointer-events-none absolute left-2 top-2 h-2 w-2 rounded-full bg-[#22C55E] opacity-0 shadow-[0_0_10px_2px_rgba(34,197,94,0.8)] transition-opacity duration-300 group-hover/tile:opacity-100" />
-          </button>
-        ))}
-      </div>
-
-      {lightboxMounted && lightboxIndex !== null && (
-        <div
-          ref={backdropRef}
-          className="fixed inset-0 z-[3000] flex flex-col items-center justify-center bg-[#0B2643]/97 p-4 backdrop-blur-xl sm:p-8"
-          style={{ opacity: 0 }}
-          onClick={closeLightbox}
-        >
-          <div
-            className="mb-4 flex w-full max-w-3xl items-center justify-between"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <span className="text-[11px] uppercase tracking-[0.22em] text-white/60">
-              {title} — {lightboxIndex + 1} / {images.length}
-            </span>
-            <button
-              onClick={closeLightbox}
-              aria-label="Close image viewer"
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-[#22C55E]"
-            >
-              <X size={14} strokeWidth={1.75} />
-            </button>
-          </div>
-
-          <div
-            className="relative flex w-full max-w-3xl flex-1 items-center justify-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {images.length > 1 && (
-              <button
-                onClick={() => go(-1)}
-                aria-label="Previous image"
-                className="absolute left-0 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md transition-colors hover:bg-[#22C55E] sm:-left-4"
-              >
-                <ChevronLeft size={18} strokeWidth={1.75} />
-              </button>
-            )}
-
-            <div className="relative aspect-[4/3] w-full max-w-2xl overflow-hidden rounded-2xl">
-              <div
-                ref={stageRef}
-                className="absolute inset-0 cursor-grab select-none active:cursor-grabbing"
-                onPointerDown={handlePointerDown}
-                onPointerUp={handlePointerUp}
-              >
-                <Image
-                  key={lightboxIndex}
-                  src={images[lightboxIndex]}
-                  alt={`${title} full view ${lightboxIndex + 1}`}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 760px"
-                  className="pointer-events-none select-none object-cover"
-                  priority
-                />
-                <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />
-              </div>
-            </div>
-
-            {images.length > 1 && (
-              <button
-                onClick={() => go(1)}
-                aria-label="Next image"
-                className="absolute right-0 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md transition-colors hover:bg-[#22C55E] sm:-right-4"
-              >
-                <ChevronRight size={18} strokeWidth={1.75} />
-              </button>
-            )}
-          </div>
-
-          {images.length > 1 && (
-            <div
-              className="mt-4 flex w-full max-w-3xl items-center justify-center gap-2 overflow-x-auto pb-1"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {images.map((src, i) => (
-                <button
-                  key={src + i}
-                  onClick={() => setLightboxIndex(i)}
-                  aria-label={`Go to image ${i + 1}`}
-                  className={`relative h-12 w-16 shrink-0 overflow-hidden rounded-lg transition-all duration-300 ${
-                    i === lightboxIndex
-                      ? "ring-2 ring-[#22C55E] opacity-100"
-                      : "opacity-45 hover:opacity-80"
-                  }`}
-                >
-                  <Image
-                    src={src}
-                    alt=""
-                    fill
-                    sizes="64px"
-                    className="object-cover"
-                    loading="lazy"
-                  />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </>
-  );
-}
-
 /* -------------------------------------------------------------------- */
 /*  Main section (no scroll lag, no card entrance animations)           */
 /* -------------------------------------------------------------------- */
@@ -786,11 +529,6 @@ export default function ServicesSection() {
   };
 
   const modalCategory = modalIndex !== null ? CATEGORIES[modalIndex] : null;
-  const modalImages = useMemo(
-    () =>
-      modalCategory ? (modalCategory.gallery ?? [modalCategory.image]) : [],
-    [modalCategory],
-  );
 
   useEffect(() => {
     if (!modalMounted) return;
@@ -929,7 +667,7 @@ export default function ServicesSection() {
 
           <div
             ref={modalCardRef}
-            className="relative flex w-full max-w-5xl flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_60px_120px_-30px_rgba(17,62,110,0.5)]"
+            className="relative flex w-full max-w-4xl flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_60px_120px_-30px_rgba(17,62,110,0.5)]"
             style={{ maxHeight: "min(720px, 90vh)", opacity: 0 }}
           >
             <button
@@ -941,7 +679,7 @@ export default function ServicesSection() {
             </button>
 
             <div className="flex flex-1 flex-col overflow-y-auto sm:flex-row sm:overflow-hidden">
-              <div className="relative flex w-full flex-none flex-col gap-5 bg-[#113E6E] p-6 sm:w-[46%] sm:overflow-y-auto sm:p-8">
+              <div className="relative flex w-full flex-none flex-col gap-5 bg-[#113E6E] p-6 sm:w-[40%] sm:overflow-y-auto sm:p-8">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] tracking-[0.25em] text-[#22C55E]">
                     {String((modalIndex ?? 0) + 1).padStart(2, "0")} /{" "}
@@ -957,16 +695,9 @@ export default function ServicesSection() {
                     {modalCategory.title}
                   </h3>
                   <p className="mt-1.5 text-sm text-white/70">
-                    {modalCategory.services.length} services ·{" "}
-                    {modalImages.length} image
-                    {modalImages.length > 1 ? "s" : ""}
+                    {modalCategory.services.length} services included
                   </p>
                 </div>
-
-                <GalleryMosaic
-                  images={modalImages}
-                  title={modalCategory.title}
-                />
 
                 <div className="mt-auto flex items-center gap-2 pt-2">
                   <button

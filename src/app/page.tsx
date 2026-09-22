@@ -3,7 +3,6 @@ import FAQ from "@/Components/Faq/HomeFaq";
 import CTASection from "@/Components/Home/HomeCTA";
 import ProjectsSection from "@/Components/Home/HomeProject";
 import Testimonials from "@/Components/Home/HomeTestimonial";
-import Services from "@/Components/Home/Service";
 import ServicesSection from "@/Components/Home/ServiceMain";
 import StatisticsSection from "@/Components/Home/Statistics";
 import WhyChooseSection from "@/Components/Home/WhyChooseUs";
@@ -11,6 +10,7 @@ import ProcessSection from "@/Components/Process/Process";
 import TechStackSection from "@/Components/TechStack/TechStack";
 import IndustriesSection from "@/Components/WeServe/WeServe";
 import HeroSection from "@/Components/Home/HeroSection";
+import Heroprofessional from "@/Components/Home/Heroprofessional";
 
 export const metadata: Metadata = {
   title: "IT Services Company in Odisha, India | Growwyld Tech",
@@ -65,12 +65,12 @@ export default function Home() {
   return (
     <main>
       <HeroSection />
-      <Services />
+      <Heroprofessional />
       <StatisticsSection />
-      <ProjectsSection />
+      <ServicesSection />
       <TechStackSection />
       <ProcessSection />
-      <ServicesSection />
+      <ProjectsSection />
       <IndustriesSection />
       <Testimonials />
       <WhyChooseSection />

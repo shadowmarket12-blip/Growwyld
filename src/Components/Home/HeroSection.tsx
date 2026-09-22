@@ -278,7 +278,7 @@ const ServiceCircle = React.memo(function ServiceCircle() {
         >
           <div className="relative w-[70%] h-[70%]">
             <Image
-              src="/Images/GT Transparent logo.png"
+              src="/Images/GT-Transparent-logo.png"
               alt="Growwyld Tech logo"
               fill
               sizes="(max-width: 640px) 80px, (max-width: 1024px) 110px, 150px"

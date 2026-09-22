@@ -356,7 +356,7 @@ export default function ProjectsSection() {
       ref={sectionRef}
       onMouseMove={handleSectionMouseMove}
       onMouseLeave={handleRowLeave}
-      className={`${poppins.className} relative bg-white text-[#0A0A0A] px-6 md:px-12 py-24 md:py-25 overflow-hidden`}
+      className={`${poppins.className} relative bg-white text-[#0A0A0A] px-6 md:px-12 py-5 md:py-25 overflow-hidden`}
     >
       <div
         ref={cursorImgRef}

@@ -681,11 +681,11 @@ export default function Navbar() {
             </div>
 
             {/* Drawer footer CTA (sticky at bottom) */}
-            <div className="shrink-0 px-3 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-black/10 sm:px-4">
+            <div className="shrink-0 px-3 pt-3  sm:px-4">
               <Link
                 href="/contact"
                 onClick={closeDrawer}
-                className="flex items-center justify-center gap-2 py-3.5 text-white font-semibold shadow-lg shadow-green-500/20 hover:opacity-90 transition-opacity"
+                className="flex items-center justify-center gap-2 py-3.5 text-white font-semibold  hover:opacity-90 transition-opacity"
               >
                 <GooeyButton />
               </Link>

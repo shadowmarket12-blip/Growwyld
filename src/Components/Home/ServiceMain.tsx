@@ -31,7 +31,7 @@ if (typeof window !== "undefined") {
 const BRAND = {
   name: "Growwyld",
   tagline: "Digital Craft Studio",
-  logo: "/Images/GT Transparent logo.png",
+  logo: "/Images/GT-Transparent-logo.png",
 };
 
 interface Category {

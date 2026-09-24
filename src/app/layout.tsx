@@ -4,6 +4,7 @@ import { Poppins } from "next/font/google";
 import Footer from "@/Components/Footer/Footer";
 import Navbar from "@/Components/Navbar/Navbar";
 import SmoothScroll from "@/Components/SmoothScroll";
+import Script from "next/script";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -24,6 +25,18 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${poppins.className} h-full antialiased`}>
       <body className="flex flex-col font-poppins">
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-448QKWBP1K"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-448QKWBP1K');
+          `}
+        </Script>
         <SmoothScroll />
         <Navbar />
         <main className="flex-1">{children}</main>

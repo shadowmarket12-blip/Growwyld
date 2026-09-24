@@ -65,7 +65,7 @@ const CONTACT_CARDS: ContactCardData[] = [
     icon: Phone,
     label: "Call us",
     primary: "+91 7008308543",
-    secondary: "Mon–Fri, 8:00–19:00 CST",
+    secondary: "Mon–Fri, 9:00–17:00 CST",
     href: "tel:+91 7008308543",
   },
   {
@@ -241,29 +241,6 @@ export default function ContactPage() {
         {/* ---------------------------------------------------------- */}
         {/* Minimal header                                              */}
         {/* ---------------------------------------------------------- */}
-        <header className="border-b" style={{ borderColor: TOKENS.line }}>
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 sm:px-10">
-            <a href="#" className="flex items-center gap-2.5">
-              <span
-                className="flex h-8 w-8 items-center justify-center rounded-lg font-display text-sm font-bold text-white"
-                style={{ backgroundColor: TOKENS.navy }}
-              >
-                N
-              </span>
-              <span className="font-display text-[17px] font-semibold">
-                Northstack
-              </span>
-            </a>
-            <a
-              href="tel:+15128840192"
-              className="hidden items-center gap-2 text-sm font-medium sm:flex"
-              style={{ color: TOKENS.slate }}
-            >
-              <Phone className="h-4 w-4" strokeWidth={1.75} />
-              +1 (512) 884-0192
-            </a>
-          </div>
-        </header>
 
         {/* ---------------------------------------------------------- */}
         {/* Hero                                                        */}
@@ -355,7 +332,7 @@ export default function ContactPage() {
                   style={{ color: TOKENS.blue }}
                 >
                   <Phone className="h-4 w-4" strokeWidth={1.75} />
-                  +1 (512) 884-0192
+                  +91 7008308543
                 </a>
               </div>
             </motion.div>

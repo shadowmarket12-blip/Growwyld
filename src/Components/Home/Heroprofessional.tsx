@@ -33,7 +33,7 @@ export default function Heroprofessional() {
         .from("[data-hero-cta]", { opacity: 0, y: 18, duration: 0.6 }, "-=0.4")
         .from(
           "[data-hero-stage]",
-          { opacity: 0, scale: 0.92, duration: 0.9, ease: "power4.out" },
+          { opacity: 0, scale: 0.94, duration: 0.9, ease: "power4.out" },
           "-=0.7",
         )
         .from(
@@ -70,10 +70,10 @@ export default function Heroprofessional() {
 
         const applyMove = () => {
           quickSetters.forEach((setter) => {
-            setter.x(lastX * 24 * setter.depth);
-            setter.y(lastY * 24 * setter.depth);
-            setter.rotateX(lastY * -6 * setter.depth);
-            setter.rotateY(lastX * 6 * setter.depth);
+            setter.x(lastX * 18 * setter.depth);
+            setter.y(lastY * 18 * setter.depth);
+            setter.rotateX(lastY * -4 * setter.depth);
+            setter.rotateY(lastX * 4 * setter.depth);
           });
           ticking = false;
         };
@@ -106,7 +106,6 @@ export default function Heroprofessional() {
         stage.addEventListener("mousemove", handleMove, { passive: true });
         stage.addEventListener("mouseleave", handleLeave, { passive: true });
 
-        // ✅ use `self` (the context) instead of `ctx`
         self.add(() => () => {
           stage.removeEventListener("mousemove", handleMove);
           stage.removeEventListener("mouseleave", handleLeave);
@@ -145,15 +144,12 @@ export default function Heroprofessional() {
       ref={sectionRef}
       className="relative overflow-hidden bg-paper px-6 py-16 text-ink sm:px-10 sm:py-24 lg:px-16 lg:py-28"
     >
-      {/* Animated gradient mesh background */}
+      {/* Soft background texture (kept subtle, not the main visual anymore) */}
       <div
         data-hero-mesh
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 will-change-transform"
       >
-        <div className="absolute -top-40 left-1/4 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-ink/10 via-ink/5 to-transparent blur-3xl" />
-        <div className="absolute top-1/3 -right-32 h-[24rem] w-[24rem] rounded-full bg-gradient-to-bl from-ink/[0.08] via-ink/[0.04] to-transparent blur-3xl" />
-        <div className="absolute bottom-0 left-0 h-[20rem] w-[20rem] rounded-full bg-gradient-to-tr from-ink/[0.06] to-transparent blur-3xl" />
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -164,61 +160,54 @@ export default function Heroprofessional() {
         />
       </div>
 
-      <div className="relative z-10 mx-auto grid max-w-7xl gap-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-10">
-        {/* 3D stage column */}
+      <div className="relative z-10 mx-auto grid max-w-7xl gap-16 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-12">
+        {/* Left column — solid color / image card box */}
         <div
           ref={stageRef}
           data-hero-stage
-          className="relative mx-auto aspect-square w-full max-w-md [perspective:1200px] sm:max-w-lg lg:order-1 lg:max-w-none"
+          className="relative mx-auto w-full max-w-md [perspective:1200px] lg:order-1 lg:max-w-none"
         >
-          {/* Base glass panel */}
+          {/* Main card: image + strong color overlay so any text stays readable */}
           <div
             ref={addLayer}
-            data-depth="0.6"
-            className="absolute inset-6 rounded-[2rem] border border-ink/10 bg-gradient-to-br from-white/60 to-white/10 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.25)] backdrop-blur-md [transform-style:preserve-3d] will-change-transform sm:inset-10"
-          />
-
-          {/* Center core shape */}
-          <div
-            ref={addLayer}
-            data-depth="1"
-            className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-gradient-to-br from-ink to-ink/70 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] [transform-style:preserve-3d] will-change-transform sm:h-52 sm:w-52"
+            data-depth="0.5"
+            className="relative aspect-[4/5] w-full overflow-hidden rounded-[1.75rem] shadow-[0_30px_70px_-20px_rgba(0,0,0,0.45)] [transform-style:preserve-3d] will-change-transform sm:aspect-square lg:aspect-[4/5]"
           >
-            <div className="flex h-full w-full items-center justify-center">
-              <svg
-                aria-hidden
-                viewBox="0 0 24 24"
-                fill="none"
-                className="h-16 w-16 text-paper/90 sm:h-20 sm:w-20"
-              >
-                <path
-                  d="M4 6.5C4 5.67 4.67 5 5.5 5h13c.83 0 1.5.67 1.5 1.5v11c0 .83-.67 1.5-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5v-11Z"
-                  stroke="currentColor"
-                  strokeWidth="1.4"
-                />
-                <path
-                  d="M4 9h16M8 5v4"
-                  stroke="currentColor"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M8.5 13.5 10.5 15.5 15.5 12"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+            {/* Background image */}
+            <img
+              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1200&auto=format&fit=crop"
+              alt="Web development team working on a project"
+              className="absolute inset-0 h-full w-full object-cover"
+              loading="lazy"
+            />
+
+            {/* Solid color wash for brand feel + guaranteed contrast */}
+            <div className="absolute inset-0 bg-gradient-to-b from-indigo-900/80 via-indigo-950/70 to-indigo-950/90" />
+
+            {/* Content inside the card */}
+            <div className="relative flex h-full flex-col justify-between p-6 sm:p-8">
+              <span className="inline-flex w-fit items-center rounded-full border border-white/25 bg-white/10 px-4 py-1.5 font-body text-xs font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
+                Web Development
+              </span>
+
+              <div>
+                <p className="font-body text-2xl font-bold leading-snug text-white sm:text-3xl">
+                  We build websites that work as hard as you do.
+                </p>
+                <p className="mt-3 font-body text-sm text-white/80 sm:text-base">
+                  Fast, scalable, and search-ready platforms crafted for
+                  businesses in Bhubaneswar and beyond.
+                </p>
+              </div>
             </div>
           </div>
 
           {/* Floating stat cards */}
           <div
             ref={addLayer}
-            data-depth="1.6"
+            data-depth="1.4"
             data-float-card
-            className="absolute left-0 top-4 w-[9.5rem] rounded-2xl border border-ink/10 bg-paper/90 p-4 shadow-[0_18px_40px_-16px_rgba(0,0,0,0.3)] backdrop-blur-sm will-change-transform sm:left-2 sm:top-6"
+            className="absolute -left-4 top-6 w-[9rem] rounded-2xl border border-ink/10 bg-paper/95 p-4 shadow-[0_18px_40px_-16px_rgba(0,0,0,0.35)] backdrop-blur-sm will-change-transform sm:-left-6 sm:top-8 sm:w-[9.5rem]"
           >
             <p className="font-body text-2xl font-bold text-black">Fast</p>
             <p className="mt-0.5 font-body text-xs text-ink/60">
@@ -228,9 +217,9 @@ export default function Heroprofessional() {
 
           <div
             ref={addLayer}
-            data-depth="1.3"
+            data-depth="1.1"
             data-float-card
-            className="absolute bottom-6 right-0 w-[10rem] rounded-2xl border border-ink/10 bg-paper/90 p-4 shadow-[0_18px_40px_-16px_rgba(0,0,0,0.3)] backdrop-blur-sm will-change-transform sm:bottom-10 sm:right-2"
+            className="absolute -right-4 bottom-24 w-[9.5rem] rounded-2xl border border-ink/10 bg-paper/95 p-4 shadow-[0_18px_40px_-16px_rgba(0,0,0,0.35)] backdrop-blur-sm will-change-transform sm:-right-6 sm:w-[10rem]"
           >
             <p className="font-body text-2xl font-bold text-black">Scalable</p>
             <p className="mt-0.5 font-body text-xs text-ink/60">
@@ -240,30 +229,29 @@ export default function Heroprofessional() {
 
           <div
             ref={addLayer}
-            data-depth="2"
+            data-depth="1.7"
             data-float-card
-            className="absolute -bottom-2 left-1/2 w-[8.5rem] -translate-x-1/2 rounded-2xl border border-ink/10 bg-paper/90 p-4 text-center shadow-[0_18px_40px_-16px_rgba(0,0,0,0.3)] backdrop-blur-sm will-change-transform sm:left-1/3"
+            className="absolute -bottom-6 left-1/2 w-[8.5rem] -translate-x-1/2 rounded-2xl border border-ink/10 bg-paper/95 p-4 text-center shadow-[0_18px_40px_-16px_rgba(0,0,0,0.35)] backdrop-blur-sm will-change-transform"
           >
             <p className="font-body text-2xl font-bold text-black">SEO</p>
             <p className="mt-0.5 font-body text-xs text-ink/60">
               Search-ready by design
             </p>
           </div>
-
-          {/* Decorative ring */}
-          <div
-            ref={addLayer}
-            data-depth="0.4"
-            aria-hidden
-            className="absolute inset-0 rounded-full border border-dashed border-ink/15 [transform-style:preserve-3d]"
-          />
         </div>
 
         {/* Text column */}
         <div className="max-w-2xl lg:order-2">
+          <span
+            data-hero-eyebrow
+            className="inline-flex items-center rounded-full border border-ink/15 px-4 py-1.5 font-body text-xs font-semibold uppercase tracking-wide text-ink/70"
+          >
+            Bhubaneswar, Odisha
+          </span>
+
           <h1
             data-hero-heading
-            className="mt-5 text-2xl md:text-3xl lg:text-5xl font-medium text-black mb-3"
+            className="mt-5 text-2xl font-medium text-black md:text-3xl lg:text-5xl"
           >
             Professional Web Development Services in Bhubaneswar
           </h1>

@@ -175,14 +175,13 @@ export default function Heroprofessional() {
           >
             {/* Background image */}
             <img
-              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1200&auto=format&fit=crop"
+              src="/Services/Cloud-DevOps.webp"
               alt="Web development team working on a project"
               className="absolute inset-0 h-full w-full object-cover"
               loading="lazy"
             />
 
             {/* Solid color wash for brand feel + guaranteed contrast */}
-            <div className="absolute inset-0 bg-gradient-to-b from-indigo-900/80 via-indigo-950/70 to-indigo-950/90" />
 
             {/* Content inside the card */}
             <div className="relative flex h-full flex-col justify-between p-6 sm:p-8">
@@ -257,20 +256,20 @@ export default function Heroprofessional() {
           </h1>
 
           <div data-hero-copy className="mt-6 space-y-4">
-            <p className="text-base leading-relaxed text-ink/70 sm:text-lg">
+            <p className="text-[15px] leading-relaxed text-ink/70 sm:text-[17px]">
               Your website is more than just an online presence, it&apos;s often
               the first impression customers have of your business. A
               well-designed website builds trust, enhances user experience, and
               helps turn visitors into customers.
             </p>
-            <p className="text-base leading-relaxed text-ink/70 sm:text-lg">
+            <p className="text-[15px] leading-relaxed text-ink/70 sm:text-[17px]">
               As a Web Development Company in Bhubaneswar, we create websites
               and digital platforms designed around your business goals. Whether
               you need a corporate website, an e-commerce store, a custom web
               application, or a mobile-first solution, our focus is on building
               digital experiences that are fast, scalable, and easy to manage.
             </p>
-            <p className="text-base leading-relaxed text-ink/70 sm:text-lg">
+            <p className="text-[15px] leading-relaxed text-ink/70 sm:text-[17px]">
               Every project is developed with performance, usability, and search
               visibility in mind. By combining modern design, responsive
               development, and user-focused functionality, we create websites

@@ -653,15 +653,15 @@ export default function IndustriesSection() {
             data-tile
             className="relative col-span-2 row-span-2 flex flex-col justify-between overflow-hidden rounded-[28px] p-7 text-white sm:p-8"
           >
-            {/* background image / gif — swap the src for your own asset */}
-            <Image
-              src="/36218.gif"
-              alt="Industries we serve"
-              fill
-              sizes="(min-width: 1024px) 50vw, 100vw"
-              priority
-              className="object-cover"
-              unoptimized
+            {/* background video — swap the src for your own asset */}
+            <video
+              src="/WhatsApp Video 2026-09-27 at 9.11.11 PM.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="metadata"
+              className="absolute inset-0 h-full w-full object-cover"
             />
           </div>
 

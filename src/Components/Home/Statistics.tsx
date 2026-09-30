@@ -157,48 +157,6 @@ const StatisticsSection = () => {
       ref={sectionRef}
       className="relative py-16 lg:py-24 overflow-hidden bg-white"
     >
-      {/* Luxury background patterns */}
-      <div className="absolute inset-0">
-        {/* Subtle grid */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `
-            linear-gradient(to right, #000 1px, transparent 1px),
-            linear-gradient(to bottom, #000 1px, transparent 1px)
-          `,
-            backgroundSize: "60px 60px",
-          }}
-        />
-
-        {/* Elegant corner decorations */}
-        <div className="absolute top-0 left-0 w-64 h-64 opacity-[0.02]">
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(circle at top left, #000 0%, transparent 70%)",
-            }}
-          />
-        </div>
-        <div className="absolute bottom-0 right-0 w-64 h-64 opacity-[0.02]">
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(circle at bottom right, #000 0%, transparent 70%)",
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Top decorative line */}
-      <div className="absolute top-0 left-0 right-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-        </div>
-      </div>
-
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header - Left Aligned */}
         <div className="mb-12 lg:mb-16">
@@ -266,13 +224,6 @@ const StatisticsSection = () => {
               </div>
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* Bottom decorative line */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
         </div>
       </div>
     </section>

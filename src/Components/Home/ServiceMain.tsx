@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   ArrowUpRight,
   ChevronDown,
@@ -22,10 +21,6 @@ import {
   X,
 } from "lucide-react";
 import "@/Components/Home/style/services-section.css";
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 const BRAND = {
   name: "Growwyld",
@@ -186,11 +181,11 @@ const EASE_SOFT = "power2.out";
 const EASE_SPRING = "back.out(1.5)";
 
 /* -------------------------------------------------------------------- */
-/*  Simplified card tilt (no scroll animations)                          */
+/*  Light card tilt (desktop mouse only, no preserve-3d)                 */
 /* -------------------------------------------------------------------- */
 
 function useCardTilt() {
-  const cardRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const card = cardRef.current;
@@ -198,6 +193,8 @@ function useCardTilt() {
 
     const isFine = window.matchMedia("(pointer: fine)").matches;
     if (!isFine) return;
+
+    gsap.set(card, { transformPerspective: 1000 });
 
     const quickRotX = gsap.quickTo(card, "rotateX", {
       duration: 0.4,
@@ -208,38 +205,37 @@ function useCardTilt() {
       ease: "power2.out",
     });
 
-    let hovering = false;
     let rafId: number | null = null;
+    let hovering = false;
 
-    function handleEnter() {
+    const handleEnter = () => {
       hovering = true;
-      card!.style.willChange = "transform";
-    }
+      card.style.willChange = "transform";
+    };
 
-    function handleMove(e: MouseEvent) {
+    const handleMove = (e: MouseEvent) => {
       if (!hovering || rafId) return;
       rafId = requestAnimationFrame(() => {
         rafId = null;
-        const rect = card!.getBoundingClientRect();
+        const rect = card.getBoundingClientRect();
         const px = (e.clientX - rect.left) / rect.width;
         const py = (e.clientY - rect.top) / rect.height;
-        quickRotX(4 - py * 8);
-        quickRotY(px * 8 - 4);
+        quickRotX(3 - py * 6);
+        quickRotY(px * 6 - 3);
       });
-    }
+    };
 
-    function handleLeave() {
+    const handleLeave = () => {
       hovering = false;
       quickRotX(0);
       quickRotY(0);
-      gsap.delayedCall(0.3, () => {
-        if (!hovering) card!.style.willChange = "auto";
-      });
-    }
+      card.style.willChange = "auto";
+    };
 
     card.addEventListener("mouseenter", handleEnter, { passive: true });
     card.addEventListener("mousemove", handleMove, { passive: true });
     card.addEventListener("mouseleave", handleLeave);
+
     return () => {
       card.removeEventListener("mouseenter", handleEnter);
       card.removeEventListener("mousemove", handleMove);
@@ -248,34 +244,41 @@ function useCardTilt() {
     };
   }, []);
 
-  return { cardRef };
+  return cardRef;
 }
 
 /* -------------------------------------------------------------------- */
-/*  Premium 3D Card (no entrance animations)                             */
+/*  Card (memoized so scroll-driven `active` changes don't re-render all) */
 /* -------------------------------------------------------------------- */
 
-function CategoryCard({
-  cat,
-  index,
-  registerRef,
-  isMobileActive,
-  onOpen,
-}: {
+interface CategoryCardProps {
   cat: Category;
   index: number;
   registerRef: (el: HTMLDivElement | null, i: number) => void;
   isMobileActive: boolean;
   onOpen: (i: number) => void;
-}) {
-  const { cardRef } = useCardTilt();
+}
+
+const CategoryCard = memo(function CategoryCard({
+  cat,
+  index,
+  registerRef,
+  isMobileActive,
+  onOpen,
+}: CategoryCardProps) {
+  const cardRef = useCardTilt();
+
+  const setRefs = useCallback(
+    (el: HTMLDivElement | null) => {
+      cardRef.current = el;
+      registerRef(el, index);
+    },
+    [cardRef, registerRef, index],
+  );
 
   return (
     <div
-      ref={(el) => {
-        cardRef.current = el;
-        registerRef(el, index);
-      }}
+      ref={setRefs}
       role="button"
       tabIndex={0}
       onClick={() => onOpen(index)}
@@ -286,76 +289,51 @@ function CategoryCard({
         }
       }}
       className={`premium-card-teal group relative flex cursor-pointer flex-col overflow-hidden rounded-[36px] border-2 border-[#113E6E]/12 bg-white outline-none
-          transition-[box-shadow,border-color] duration-500 ease-out
-          hover:border-[#22C55E] hover:shadow-[0_45px_100px_-24px_rgba(17,62,110,0.35)]
+          transition-[box-shadow,border-color] duration-300 ease-out
+          hover:border-[#22C55E] hover:shadow-[0_30px_60px_-24px_rgba(17,62,110,0.35)]
           ${isMobileActive ? "block" : "hidden"} lg:block`}
       style={{
-        perspective: 1200,
-        transformStyle: "preserve-3d",
-        willChange: "auto",
-        boxShadow: "0 20px 55px -25px rgba(17,62,110,0.18)",
+        boxShadow: "0 16px 40px -24px rgba(17,62,110,0.18)",
       }}
     >
-      <div className="pointer-events-none absolute inset-0 z-[5] overflow-hidden rounded-[36px] opacity-0 transition-opacity duration-700 group-hover:opacity-100">
-        {[...Array(4)].map((_, p) => (
-          <span
-            key={p}
-            className="card-particle"
-            style={{
-              left: `${15 + p * 20}%`,
-              animationDelay: `${p * 0.35}s`,
-              animationDuration: `${3.5 + (p % 3)}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div
-        className="relative h-60 w-full overflow-hidden sm:h-68 group/image"
-        style={{ transform: "translateZ(10px)" }}
-      >
-        <div className="absolute inset-0">
-          <Image
-            src={cat.image}
-            alt={cat.title}
-            fill
-            sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 50vw, 25vw"
-            className="object-cover"
-            loading="lazy"
-          />
-        </div>
+      <div className="relative h-60 w-full overflow-hidden sm:h-68">
+        <Image
+          src={cat.image}
+          alt={cat.title}
+          fill
+          sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 50vw, 25vw"
+          className="object-cover"
+          loading="lazy"
+        />
 
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
-        <div className="absolute inset-3 rounded-2xl border border-white/20 pointer-events-none" />
-        <div className="absolute inset-5 rounded-xl border border-[#22C55E]/25 pointer-events-none" />
+        <div className="pointer-events-none absolute inset-3 rounded-2xl border border-white/20" />
+        <div className="pointer-events-none absolute inset-5 rounded-xl border border-[#22C55E]/25" />
 
         <div className="absolute bottom-7 left-7 right-7">
-          <h3 className="text-2xl leading-tight text-white drop-shadow-2xl sm:text-2xl tracking-tight">
+          <h3 className="text-2xl leading-tight tracking-tight text-white drop-shadow-2xl">
             {cat.title}
           </h3>
         </div>
       </div>
 
-      <div
-        className="relative flex flex-1 flex-col px-8 pb-8 pt-7 z-10"
-        style={{ transform: "translateZ(20px)" }}
-      >
+      <div className="relative z-10 flex flex-1 flex-col px-8 pb-8 pt-7">
         <div className="flex flex-1 flex-col justify-center gap-4">
-          <div className="group/view relative flex items-center justify-between gap-3 rounded-2xl border border-[#113E6E]/15 bg-white/70 px-5 py-4 transition-all duration-500 group-hover:border-[#22C55E]/70 group-hover:bg-white group-hover:shadow-[0_16px_40px_-20px_rgba(17,62,110,0.35)]">
+          <div className="relative flex items-center justify-between gap-3 rounded-2xl border border-[#113E6E]/15 bg-white/70 px-5 py-4 transition-colors duration-300 group-hover:border-[#22C55E]/70 group-hover:bg-white">
             <span className="flex items-center gap-3">
-              <span className="text-[12px] font-medium uppercase tracking-[0.2em] text-black transition-colors duration-300 ">
+              <span className="text-[12px] font-medium uppercase tracking-[0.2em] text-black">
                 services
               </span>
             </span>
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#113E6E] text-white transition-all duration-500 group-hover:rotate-45 group-hover:bg-[#22C55E]">
-              <ChevronDown className="h-4 w-4 transition-transform duration-500 group-hover:-rotate-90" />
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#113E6E] text-white transition-[background-color,transform] duration-300 group-hover:rotate-45 group-hover:bg-[#22C55E]">
+              <ChevronDown className="h-4 w-4 transition-transform duration-300 group-hover:-rotate-90" />
             </span>
           </div>
         </div>
 
         <div className="mt-7 flex items-center justify-between border-t border-[#113E6E]/15 pt-6">
           <div className="flex items-center gap-2.5">
-            <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full  border border-black/2">
+            <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-black/5">
               <Image
                 src={BRAND.logo}
                 alt={`${BRAND.name} logo`}
@@ -368,13 +346,13 @@ function CategoryCard({
           <Link
             href="/contact"
             onClick={(e) => e.stopPropagation()}
-            className="group/cta relative inline-flex items-center gap-2.5 text-[13px] font-medium text-[#113E6E] transition-all duration-300 hover:text-[#22C55E]"
+            className="group/cta relative inline-flex items-center gap-2.5 text-[13px] font-medium text-[#113E6E] transition-colors duration-300 hover:text-[#22C55E]"
           >
             <span className="relative">
               Explore Service
-              <span className="absolute bottom-0 left-0 h-[1.5px] w-0 bg-[#22C55E] transition-all duration-300 group-hover/cta:w-full" />
+              <span className="absolute bottom-0 left-0 h-[1.5px] w-0 bg-[#22C55E] transition-[width] duration-300 group-hover/cta:w-full" />
             </span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#113E6E] shadow-lg shadow-[#113E6E]/25 transition-all duration-300 group-hover/cta:rotate-45 group-hover/cta:bg-[#22C55E] group-hover/cta:shadow-xl group-hover/cta:shadow-[#22C55E]/40">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#113E6E] shadow-lg shadow-[#113E6E]/25 transition-[background-color,transform] duration-300 group-hover/cta:rotate-45 group-hover/cta:bg-[#22C55E]">
               <ArrowUpRight className="h-3.5 w-3.5 text-white" />
             </span>
           </Link>
@@ -382,16 +360,15 @@ function CategoryCard({
       </div>
     </div>
   );
-}
+});
 
 /* -------------------------------------------------------------------- */
-/*  Main section (no scroll lag, no card entrance animations)           */
+/*  Main section                                                         */
 /* -------------------------------------------------------------------- */
 
 export default function ServicesSection() {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [active, setActive] = useState(0);
-  const gridRef = useRef<HTMLDivElement>(null);
 
   const [modalIndex, setModalIndex] = useState<number | null>(null);
   const [modalMounted, setModalMounted] = useState(false);
@@ -412,13 +389,12 @@ export default function ServicesSection() {
       opacity: 0,
       y: 16,
       scale: 0.97,
-      duration: 0.28,
+      duration: 0.25,
       ease: EASE_SOFT,
-      clearProps: "all",
     });
     gsap.to(backdrop, {
       opacity: 0,
-      duration: 0.3,
+      duration: 0.28,
       ease: EASE_SOFT,
       onComplete: () => {
         setModalIndex(null);
@@ -456,12 +432,12 @@ export default function ServicesSection() {
         opacity: 1,
         y: 0,
         scale: 1,
-        duration: 0.55,
+        duration: 0.5,
         ease: EASE_SPRING,
         clearProps: "transform",
       },
     );
-  }, [modalMounted, modalIndex]);
+  }, [modalMounted]);
 
   useEffect(() => {
     if (modalIndex === null) return;
@@ -488,12 +464,12 @@ export default function ServicesSection() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
+        for (const entry of entries) {
           if (entry.isIntersecting) {
             const idx = cardRefs.current.findIndex((el) => el === entry.target);
             if (idx !== -1) setActive(idx);
           }
-        });
+        }
       },
       { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
     );
@@ -501,7 +477,7 @@ export default function ServicesSection() {
     return () => observer.disconnect();
   }, []);
 
-  const scrollToCard = (idx: number) => {
+  const scrollToCard = useCallback((idx: number) => {
     setActive(idx);
     requestAnimationFrame(() => {
       const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
@@ -509,24 +485,15 @@ export default function ServicesSection() {
       if (!target) return;
 
       if (isDesktop) {
-        target.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
       } else {
-        const targetRect = target.getBoundingClientRect();
-        const scrollTop =
-          window.pageYOffset || document.documentElement.scrollTop;
-        const targetTop = targetRect.top + scrollTop;
-        const offset = 120;
-
-        window.scrollTo({
-          top: targetTop - offset,
-          behavior: "smooth",
-        });
+        const top =
+          target.getBoundingClientRect().top +
+          (window.pageYOffset || document.documentElement.scrollTop);
+        window.scrollTo({ top: top - 120, behavior: "smooth" });
       }
     });
-  };
+  }, []);
 
   const modalCategory = modalIndex !== null ? CATEGORIES[modalIndex] : null;
 
@@ -552,13 +519,33 @@ export default function ServicesSection() {
       id="services"
       className="relative overflow-hidden bg-white py-24 sm:py-28 md:py-30"
     >
+      {/* Static gradient glows: no blur filter, no animation, no repaint cost */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="pointer-events-none absolute inset-0"
         style={{ contain: "paint" }}
+        aria-hidden
       >
-        <div className="absolute bottom-0 left-0 w-[1000px] h-[1000px] bg-gradient-to-tr from-[#113E6E]/[0.08] to-transparent rounded-full blur-3xl will-change-transform" />
-        <div className="absolute top-20 left-10 w-32 h-32 bg-[#22C55E]/[0.06] rounded-full blur-2xl animate-float will-change-transform" />
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-[#113E6E]/[0.07] rounded-full blur-2xl animate-float-delayed will-change-transform" />
+        <div
+          className="absolute -bottom-72 -left-72 h-[900px] w-[900px] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle at center, rgba(17,62,110,0.08) 0%, rgba(17,62,110,0) 70%)",
+          }}
+        />
+        <div
+          className="absolute -left-10 top-0 h-72 w-72 rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle at center, rgba(34,197,94,0.07) 0%, rgba(34,197,94,0) 70%)",
+          }}
+        />
+        <div
+          className="absolute -bottom-10 -right-10 h-80 w-80 rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle at center, rgba(17,62,110,0.08) 0%, rgba(17,62,110,0) 70%)",
+          }}
+        />
       </div>
 
       <div className="relative mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16">
@@ -571,11 +558,10 @@ export default function ServicesSection() {
                 fill
                 sizes="56px"
                 className="object-contain"
-                priority
               />
             </div>
             <div className="leading-tight">
-              <div className="text-[1.4rem] tracking-tight text-[#113E6E] sm:text-2xl font-medium">
+              <div className="text-[1.4rem] font-medium tracking-tight text-[#113E6E] sm:text-2xl">
                 {BRAND.name}
               </div>
             </div>
@@ -584,7 +570,7 @@ export default function ServicesSection() {
 
         <div className="grid grid-cols-1 items-end gap-5 lg:grid-cols-[1fr_auto]">
           <div>
-            <h2 className="mt-2 max-w-2xl text-3xl md:text-4xl lg:text-5xl font-medium text-black leading-tight">
+            <h2 className="mt-2 max-w-2xl text-3xl font-medium leading-tight text-black md:text-4xl lg:text-5xl">
               Solutions designed around your business goals
             </h2>
             <p className="mt-6 max-w-md text-[15px] leading-relaxed text-black">
@@ -596,7 +582,7 @@ export default function ServicesSection() {
 
           <Link
             href="/contact"
-            className="group relative inline-flex w-fit shrink-0 items-center gap-3 overflow-hidden rounded-full bg-gradient-to-r from-[#113E6E] via-[#1a4a7a] to-[#22C55E] px-8 py-4 text-[13px] font-medium uppercase tracking-[0.18em] text-white shadow-[0_18px_40px_-16px_rgba(17,62,110,0.35)] transition-all duration-500 hover:-translate-y-0.5 hover:shadow-[0_24px_48px_-16px_rgba(34,197,94,0.5)] border border-white/20"
+            className="group relative inline-flex w-fit shrink-0 items-center gap-3 overflow-hidden rounded-full border border-white/20 bg-gradient-to-r from-[#113E6E] via-[#1a4a7a] to-[#22C55E] px-8 py-4 text-[13px] font-medium uppercase tracking-[0.18em] text-white shadow-[0_18px_40px_-16px_rgba(17,62,110,0.35)] transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_48px_-16px_rgba(34,197,94,0.5)]"
           >
             <span
               className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full"
@@ -609,21 +595,25 @@ export default function ServicesSection() {
           </Link>
         </div>
 
-        <div className="mt-14 -mx-6 flex gap-x-3 gap-y-3 overflow-x-auto px-6 pb-3 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
+        <div className="-mx-6 mt-14 flex gap-x-3 gap-y-3 overflow-x-auto px-6 pb-3 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
           {CATEGORIES.map((cat, i) => (
             <button
               key={cat.title}
               onClick={() => scrollToCard(i)}
               aria-pressed={active === i}
-              className={`group relative shrink-0 whitespace-nowrap rounded-full border px-5 py-2.5 text-[13px] font-medium transition-all duration-400 ${
+              className={`group relative shrink-0 whitespace-nowrap rounded-full border px-5 py-2.5 text-[13px] font-medium transition-colors duration-300 ${
                 active === i
                   ? "border-transparent bg-[#113E6E] text-white shadow-[0_10px_30px_-12px_rgba(17,62,110,0.5)]"
-                  : "border-[#113E6E]/15 bg-[#EAF8FC] text-[#113E6E]/80 hover:border-[#113E6E]/60 hover:text-[#113E6E] hover:bg-[#D6F1F8]"
+                  : "border-[#113E6E]/15 bg-[#EAF8FC] text-[#113E6E]/80 hover:border-[#113E6E]/60 hover:bg-[#D6F1F8] hover:text-[#113E6E]"
               }`}
             >
               <span className="flex items-center gap-2">
                 <span
-                  className={`${active === i ? "text-white" : "text-[#113E6E]/60 group-hover:text-[#113E6E]"}`}
+                  className={
+                    active === i
+                      ? "text-white"
+                      : "text-[#113E6E]/60 group-hover:text-[#113E6E]"
+                  }
                 >
                   {cat.icon}
                 </span>
@@ -633,11 +623,7 @@ export default function ServicesSection() {
           ))}
         </div>
 
-        <div
-          ref={gridRef}
-          className="mt-12 grid grid-cols-1 gap-7 sm:gap-8 md:grid-cols-2 xl:grid-cols-4"
-          style={{ perspective: 1200 }}
-        >
+        <div className="mt-12 grid grid-cols-1 gap-7 sm:gap-8 md:grid-cols-2 xl:grid-cols-4">
           {CATEGORIES.map((cat, i) => (
             <CategoryCard
               key={cat.title}
@@ -658,16 +644,17 @@ export default function ServicesSection() {
           aria-label={`${modalCategory.title} services`}
           className="fixed inset-0 z-[2000] flex items-center justify-center p-4 sm:p-8"
         >
+          {/* Solid backdrop: no backdrop-filter blur */}
           <div
             ref={modalBackdropRef}
             onClick={closeModal}
-            className="absolute inset-0 bg-[#0B2643]"
-            style={{ backdropFilter: "blur(10px)", opacity: 0 }}
+            className="absolute inset-0 bg-[#0B2643]/90"
+            style={{ opacity: 0 }}
           />
 
           <div
             ref={modalCardRef}
-            className="relative flex w-full max-w-4xl flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_60px_120px_-30px_rgba(17,62,110,0.5)]"
+            className="relative flex w-full max-w-4xl flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_40px_80px_-30px_rgba(17,62,110,0.5)]"
             style={{ maxHeight: "min(720px, 90vh)", opacity: 0 }}
           >
             <button
@@ -685,7 +672,7 @@ export default function ServicesSection() {
                     {String((modalIndex ?? 0) + 1).padStart(2, "0")} /{" "}
                     {String(CATEGORIES.length).padStart(2, "0")}
                   </span>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/25 bg-white/15 text-white backdrop-blur-sm">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/25 bg-white/15 text-white">
                     {modalCategory.icon}
                   </span>
                 </div>
@@ -738,14 +725,14 @@ export default function ServicesSection() {
                   ))}
                 </div>
 
-                <span className="mt-8 mb-4 block h-px w-16 bg-[#22C55E]/40" />
+                <span className="mb-4 mt-8 block h-px w-16 bg-[#22C55E]/40" />
                 <p className="text-sm leading-relaxed text-[#113E6E]/70">
                   Have a project that needs {modalCategory.title.toLowerCase()}?
                   Let&rsquo;s talk about how we can bring it to life.
                 </p>
                 <Link
                   href="/contact"
-                  className="mt-6 inline-flex items-center gap-2.5 text-[13px] font-medium text-[#113E6E] transition-all duration-300 hover:text-[#22C55E]"
+                  className="mt-6 inline-flex items-center gap-2.5 text-[13px] font-medium text-[#113E6E] transition-colors duration-300 hover:text-[#22C55E]"
                 >
                   Get in touch
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#113E6E] to-[#22C55E] shadow-lg shadow-[#113E6E]/25">

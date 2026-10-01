@@ -97,7 +97,7 @@ export default function Navbar() {
   const [activeDropdown, setActiveDropdown] = useState<DropdownKey>(null);
   const [mobileExpanded, setMobileExpanded] = useState<DropdownKey>(null);
   const [scrolled, setScrolled] = useState(false);
-  const [isMobile, setIsMobile] = useState(false); // NEW: Track mobile viewport
+  const [isMobile, setIsMobile] = useState(false); // Track mobile viewport
 
   useEffect(() => {
     setMounted(true);
@@ -280,6 +280,9 @@ export default function Navbar() {
             boxShadow: s
               ? "0 1px 0 0 rgba(0,0,0,0.10)"
               : "0 20px 40px -8px rgba(0,0,0,0.15)",
+            // ✅ FIX: soft navy-tinted border instead of black
+            borderStyle: "solid",
+            borderColor: s ? "rgba(17,62,110,0.08)" : "rgba(17,62,110,0.12)",
             borderTopWidth: s ? "0px" : "1px",
             borderLeftWidth: s ? "0px" : "1px",
             borderRightWidth: s ? "0px" : "1px",
@@ -287,6 +290,7 @@ export default function Navbar() {
             transition: [
               `border-radius  ${DUR} ${EASE}`,
               `box-shadow     ${DUR} ${EASE}`,
+              `border-color   ${DUR} ${EASE}`,
               `border-top-width    ${DUR} ${EASE}`,
               `border-left-width   ${DUR} ${EASE}`,
               `border-right-width  ${DUR} ${EASE}`,
